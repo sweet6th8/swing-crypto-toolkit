@@ -1,6 +1,5 @@
 package com.atbm.core.encryption.traditional;
 
-import java.security.Key;
 import com.atbm.core.encryption.EncryptionAlgorithm;
 
 public abstract class TraditionalEncryption implements EncryptionAlgorithm {
@@ -24,4 +23,8 @@ public abstract class TraditionalEncryption implements EncryptionAlgorithm {
     public String[] getSupportedPaddings() {
         return new String[] { "NoPadding" };
     }
+
+    public abstract String encrypt(String plainText, String key);
+
+    public abstract String decrypt(String cipherText, String key);
 }

@@ -5,6 +5,8 @@ import javax.crypto.SecretKey;
 import java.security.*;
 import java.util.Base64;
 
+// Class này chứa các phương thức tạo key cho các thuật toán
+
 public class KeyUtils {
 
     public static String generateSymmetricKey(String algorithm, int keySize) {
@@ -21,7 +23,6 @@ public class KeyUtils {
             return "Lỗi khi tạo key!";
         }
     }
-
 
     public static String generateAsymmetricKeyPair(String algorithm, int keySize) {
         try {
@@ -46,20 +47,16 @@ public class KeyUtils {
         SecureRandom rand = new SecureRandom();
         switch (algorithm) {
             case "Caesar":
-                // Trả về 1 số nguyên làm key (ví dụ: từ 1 đến 25)
-                int caesarKey = new SecureRandom().nextInt(25) + 1;
+                int caesarKey = rand.nextInt(25) + 1;
                 return "Khóa Caesar: " + caesarKey;
             case "Vigenere":
-                // Trả về chuỗi chữ cái làm key (ví dụ: ABCDE)
                 String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
                 StringBuilder vigenereKey = new StringBuilder();
-
                 for (int i = 0; i < 5; i++) {
                     vigenereKey.append(characters.charAt(rand.nextInt(characters.length())));
                 }
                 return "Khóa Vigenere: " + vigenereKey;
             case "Monoalphabetic":
-                // Trả về một hoán vị ngẫu nhiên của bảng chữ cái
                 char[] alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".toCharArray();
                 for (int i = 0; i < alphabet.length; i++) {
                     int j = rand.nextInt(alphabet.length);
@@ -68,6 +65,24 @@ public class KeyUtils {
                     alphabet[j] = tmp;
                 }
                 return "Khóa Monoalphabetic: " + new String(alphabet);
+            case "Affine":
+                int[] coprimes = { 1, 3, 5, 7, 9, 11, 15, 17, 19, 21, 23, 25 };
+                int a = coprimes[rand.nextInt(coprimes.length)];
+                int b = rand.nextInt(26);
+                return "Khóa Affine: " + a + "," + b;
+            case "Hill":
+                while (true) {
+                    int[] m = { rand.nextInt(26), rand.nextInt(26), rand.nextInt(26), rand.nextInt(26) };
+                    int det = m[0] * m[3] - m[1] * m[2];
+                    det = ((det % 26) + 26) % 26;
+                    int[] coprimesHill = { 1, 3, 5, 7, 9, 11, 15, 17, 19, 21, 23, 25 };
+                    boolean valid = false;
+                    for (int x : coprimesHill)
+                        if (det == x)
+                            valid = true;
+                    if (valid)
+                        return "Khóa Hill: " + m[0] + "," + m[1] + "," + m[2] + "," + m[3];
+                }
             default:
                 return "Không hỗ trợ thuật toán truyền thống này.";
         }

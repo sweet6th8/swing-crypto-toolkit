@@ -8,7 +8,7 @@ public class VigenereCipher extends TraditionalEncryption {
 
     public VigenereCipher() {
         super("Vigenere");
-        this.keyword = ""; // No default keyword
+        this.keyword = "";
     }
 
     public void setKeyword(String keyword) {
@@ -94,5 +94,55 @@ public class VigenereCipher extends TraditionalEncryption {
     @Override
     public String[] getSupportedPaddings() {
         return new String[] { "None" };
+    }
+
+    @Override
+    public String encrypt(String plainText, String key) {
+        String keyword = key.toUpperCase().replaceAll("[^A-Z]", "");
+        StringBuilder result = new StringBuilder();
+        int keywordIndex = 0;
+        for (char c : plainText.toCharArray()) {
+            if (c >= 'A' && c <= 'Z') {
+                char keyChar = keyword.charAt(keywordIndex % keyword.length());
+                int shift = keyChar - 'A';
+                char enc = (char) ('A' + ((c - 'A' + shift + 26) % 26));
+                result.append(enc);
+                keywordIndex++;
+            } else if (c >= 'a' && c <= 'z') {
+                char keyChar = keyword.charAt(keywordIndex % keyword.length());
+                int shift = keyChar - 'A';
+                char enc = (char) ('a' + ((c - 'a' + shift + 26) % 26));
+                result.append(enc);
+                keywordIndex++;
+            } else {
+                result.append(c);
+            }
+        }
+        return result.toString();
+    }
+
+    @Override
+    public String decrypt(String cipherText, String key) {
+        String keyword = key.toUpperCase().replaceAll("[^A-Z]", "");
+        StringBuilder result = new StringBuilder();
+        int keywordIndex = 0;
+        for (char c : cipherText.toCharArray()) {
+            if (c >= 'A' && c <= 'Z') {
+                char keyChar = keyword.charAt(keywordIndex % keyword.length());
+                int shift = 26 - (keyChar - 'A');
+                char dec = (char) ('A' + ((c - 'A' + shift + 26) % 26));
+                result.append(dec);
+                keywordIndex++;
+            } else if (c >= 'a' && c <= 'z') {
+                char keyChar = keyword.charAt(keywordIndex % keyword.length());
+                int shift = 26 - (keyChar - 'A');
+                char dec = (char) ('a' + ((c - 'a' + shift + 26) % 26));
+                result.append(dec);
+                keywordIndex++;
+            } else {
+                result.append(c);
+            }
+        }
+        return result.toString();
     }
 }

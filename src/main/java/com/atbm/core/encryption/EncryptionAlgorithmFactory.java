@@ -6,6 +6,9 @@ import com.atbm.core.encryption.symmetric.ChaCha20Poly1305Encryption;
 import com.atbm.core.encryption.asymmetric.RSAEncryption;
 import com.atbm.core.encryption.traditional.CaesarCipher;
 import com.atbm.core.encryption.traditional.VigenereCipher;
+import com.atbm.core.encryption.traditional.MonoalphabeticCipher;
+import com.atbm.core.encryption.traditional.AffineCipher;
+import com.atbm.core.encryption.traditional.HillCipher;
 
 public class EncryptionAlgorithmFactory {
     public static EncryptionAlgorithm createAlgorithm(String algorithmName) {
@@ -13,6 +16,7 @@ public class EncryptionAlgorithmFactory {
             case "aes":
                 return new AESEncryption("CBC", "PKCS5Padding", 256);
             case "3des":
+            case "desede":
                 return new DESedeEncryption("CBC", "PKCS5Padding", 168);
             case "chacha20-poly1305":
                 return new ChaCha20Poly1305Encryption();
@@ -22,6 +26,12 @@ public class EncryptionAlgorithmFactory {
                 return new CaesarCipher();
             case "vigenere":
                 return new VigenereCipher();
+            case "monoalphabetic":
+                return new MonoalphabeticCipher();
+            case "affine":
+                return new AffineCipher();
+            case "hill":
+                return new HillCipher();
             default:
                 throw new IllegalArgumentException("Unknown algorithm: " + algorithmName);
         }
@@ -41,6 +51,12 @@ public class EncryptionAlgorithmFactory {
                 return new CaesarCipher();
             case "vigenere":
                 return new VigenereCipher();
+            case "monoalphabetic":
+                return new MonoalphabeticCipher();
+            case "affine":
+                return new AffineCipher();
+            case "hill":
+                return new HillCipher();
             default:
                 throw new IllegalArgumentException("Unknown algorithm: " + algorithmName);
         }
@@ -61,6 +77,12 @@ public class EncryptionAlgorithmFactory {
                 return new CaesarCipher();
             case "vigenere":
                 return new VigenereCipher();
+            case "monoalphabetic":
+                return new MonoalphabeticCipher();
+            case "affine":
+                return new AffineCipher();
+            case "hill":
+                return new HillCipher();
             default:
                 throw new IllegalArgumentException("Unknown algorithm: " + algorithmName);
         }

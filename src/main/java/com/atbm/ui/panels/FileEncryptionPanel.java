@@ -151,7 +151,7 @@ public class FileEncryptionPanel extends JPanel implements DropTargetListener {
         JPanel algoPanel = new JPanel(new BorderLayout(5, 0));
         algoPanel.add(new JLabel("Chọn thuật toán:"), BorderLayout.NORTH);
         algorithmComboBox = new JComboBox<>(new String[] {
-                "AES", "DESede", "ChaCha20Poly1305", "RSA", "Caesar", "Vigenere"
+                "AES", "DESede", "ChaCha20-Poly1305", "RSA"
         });
         algoPanel.add(algorithmComboBox, BorderLayout.CENTER);
         panel.add(algoPanel);
@@ -330,36 +330,36 @@ public class FileEncryptionPanel extends JPanel implements DropTargetListener {
         paddingComboBox.removeAllItems();
 
         if (selectedAlgorithm != null) {
-            boolean isSymmetric = selectedAlgorithm.equals("AES") || selectedAlgorithm.equals("DESede")
-                    || selectedAlgorithm.equals("ChaCha20Poly1305");
+            boolean isSymmetric = selectedAlgorithm.equals("AES") || selectedAlgorithm.equals("DESede");
             boolean isAsymmetric = selectedAlgorithm.equals("RSA");
+            boolean isChaCha = selectedAlgorithm.equals("ChaCha20-Poly1305");
 
-            if (isSymmetric) {
+            if (isChaCha) {
+                // ChaCha20-Poly1305 doesn't use traditional modes/paddings
+                modeComboBox.addItem("None"); // Add only "None"
+                paddingComboBox.addItem("NoPadding"); // Add only "NoPadding"
+                modeComboBox.setSelectedItem("None");
+                paddingComboBox.setSelectedItem("NoPadding");
+                modeComboBox.setEnabled(false);
+                paddingComboBox.setEnabled(false);
+            } else if (isSymmetric) {
                 modeComboBox.addItem("ECB");
                 modeComboBox.addItem("CBC");
                 modeComboBox.addItem("CFB");
                 modeComboBox.addItem("OFB");
 
-                if (selectedAlgorithm.equals("ChaCha20Poly1305")) {
-                    modeComboBox.setSelectedItem("None");
+                paddingComboBox.addItem("PKCS5Padding");
+                if (selectedAlgorithm.equals("DESede")) {
+                    // DESede only supports these paddings in Java
                     paddingComboBox.addItem("NoPadding");
-                    modeComboBox.setEnabled(false);
-                    paddingComboBox.setEnabled(false);
                 } else {
-                    // For AES and DESede
-                    paddingComboBox.addItem("PKCS5Padding");
-                    if (selectedAlgorithm.equals("DESede")) {
-                        // DESede only supports these paddings in Java
-                        paddingComboBox.addItem("NoPadding");
-                    } else {
-                        // AES supports more padding options
-                        paddingComboBox.addItem("NoPadding");
-                    }
-                    modeComboBox.setEnabled(true);
-                    paddingComboBox.setEnabled(true);
-                    // Default to PKCS5Padding for better compatibility
-                    paddingComboBox.setSelectedItem("PKCS5Padding");
+                    // AES supports more padding options
+                    paddingComboBox.addItem("NoPadding");
                 }
+                modeComboBox.setEnabled(true);
+                paddingComboBox.setEnabled(true);
+                // Default to PKCS5Padding for better compatibility
+                paddingComboBox.setSelectedItem("PKCS5Padding");
             } else if (isAsymmetric) {
                 modeComboBox.addItem("ECB");
                 modeComboBox.setEnabled(false);
@@ -369,8 +369,10 @@ public class FileEncryptionPanel extends JPanel implements DropTargetListener {
                 paddingComboBox.addItem("NoPadding");
                 paddingComboBox.setEnabled(true);
             } else { // Assume Traditional
-                modeComboBox.addItem("ECB");
+                modeComboBox.addItem("None"); // Explicitly add None/NoPadding for Traditional
                 paddingComboBox.addItem("NoPadding");
+                modeComboBox.setSelectedItem("None");
+                paddingComboBox.setSelectedItem("NoPadding");
                 modeComboBox.setEnabled(false);
                 paddingComboBox.setEnabled(false);
             }

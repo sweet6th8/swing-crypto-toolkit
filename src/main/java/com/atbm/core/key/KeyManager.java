@@ -9,6 +9,8 @@ import java.util.Base64;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
+// Class này chứa các phương thức lưu và tải key
+
 public class KeyManager {
 
     // --- Saving Keys ---
@@ -104,7 +106,7 @@ public class KeyManager {
         String lowerPath = filePath.toLowerCase();
         String upperAlgo = algorithm.toUpperCase();
 
-        if (upperAlgo.equals("AES") || upperAlgo.equals("DESEDE") || upperAlgo.equals("CHACHA20POLY1305")) {
+        if (upperAlgo.equals("AES") || upperAlgo.equals("DESEDE") || upperAlgo.equals("CHACHA20-POLY1305")) {
             // Symmetric: Load SecretKey
             if (!lowerPath.endsWith(".key")) {
                 throw new IllegalArgumentException("Expected a .key file for symmetric algorithm " + algorithm);
@@ -123,10 +125,10 @@ public class KeyManager {
                 }
                 return loadPrivateKey(filePath, algorithm);
             }
-        } else if (upperAlgo.equals("CAESAR") || upperAlgo.equals("VIGENERE")) {
+        } else if (upperAlgo.equals("CAESAR") || upperAlgo.equals("VIGENERE")
+                || upperAlgo.equals("MONOALPHABETIC") || upperAlgo.equals("AFFINE") || upperAlgo.equals("HILL")) {
             // Traditional: Key file not used in the same way, return null or handle
             // differently
-            // Maybe load shift/keyword from the file if that's how you store it?
             return null;
         } else {
             throw new NoSuchAlgorithmException("Unsupported algorithm for key loading: " + algorithm);
