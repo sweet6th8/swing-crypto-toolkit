@@ -102,17 +102,13 @@ public class VigenereCipher extends TraditionalEncryption {
         StringBuilder result = new StringBuilder();
         int keywordIndex = 0;
         for (char c : plainText.toCharArray()) {
-            if (c >= 'A' && c <= 'Z') {
+            if (Character.isLetter(c)) {
+                int base = Character.isLowerCase(c) ? 'a' : 'A';
                 char keyChar = keyword.charAt(keywordIndex % keyword.length());
                 int shift = keyChar - 'A';
-                char enc = (char) ('A' + ((c - 'A' + shift + 26) % 26));
-                result.append(enc);
-                keywordIndex++;
-            } else if (c >= 'a' && c <= 'z') {
-                char keyChar = keyword.charAt(keywordIndex % keyword.length());
-                int shift = keyChar - 'A';
-                char enc = (char) ('a' + ((c - 'a' + shift + 26) % 26));
-                result.append(enc);
+                int x = c - base;
+                int shifted = (x + shift) % 26;
+                result.append((char) (base + shifted));
                 keywordIndex++;
             } else {
                 result.append(c);
@@ -127,17 +123,13 @@ public class VigenereCipher extends TraditionalEncryption {
         StringBuilder result = new StringBuilder();
         int keywordIndex = 0;
         for (char c : cipherText.toCharArray()) {
-            if (c >= 'A' && c <= 'Z') {
+            if (Character.isLetter(c)) {
+                int base = Character.isLowerCase(c) ? 'a' : 'A';
                 char keyChar = keyword.charAt(keywordIndex % keyword.length());
                 int shift = 26 - (keyChar - 'A');
-                char dec = (char) ('A' + ((c - 'A' + shift + 26) % 26));
-                result.append(dec);
-                keywordIndex++;
-            } else if (c >= 'a' && c <= 'z') {
-                char keyChar = keyword.charAt(keywordIndex % keyword.length());
-                int shift = 26 - (keyChar - 'A');
-                char dec = (char) ('a' + ((c - 'a' + shift + 26) % 26));
-                result.append(dec);
+                int x = c - base;
+                int shifted = (x + shift) % 26;
+                result.append((char) (base + shifted));
                 keywordIndex++;
             } else {
                 result.append(c);

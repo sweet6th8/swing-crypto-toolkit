@@ -31,20 +31,57 @@ public class HillCipher extends TraditionalEncryption {
     public String encrypt(String plainText, String key) {
         int[][] k = parseKey(key);
         StringBuilder result = new StringBuilder();
-        String filtered = plainText.replaceAll("[^A-Z]", "").toUpperCase();
-        if (filtered.length() % 2 != 0)
-            filtered += "X";
-        for (int i = 0; i < filtered.length(); i += 2) {
-            int[] vec = { filtered.charAt(i) - 'A', filtered.charAt(i + 1) - 'A' };
-            int c1 = (k[0][0] * vec[0] + k[0][1] * vec[1]) % 26;
-            int c2 = (k[1][0] * vec[0] + k[1][1] * vec[1]) % 26;
-            if (c1 < 0)
-                c1 += 26;
-            if (c2 < 0)
-                c2 += 26;
-            result.append((char) ('A' + c1));
-            result.append((char) ('A' + c2));
+        int i = 0;
+
+        while (i < plainText.length()) {
+            // Skip non-alphabetic characters
+            while (i < plainText.length() && !Character.isLetter(plainText.charAt(i))) {
+                result.append(plainText.charAt(i));
+                i++;
+            }
+
+            if (i >= plainText.length())
+                break;
+
+            // Get first character of pair and remember its case
+            char c1 = plainText.charAt(i);
+            boolean isC1Lower = Character.isLowerCase(c1);
+            c1 = Character.toUpperCase(c1);
+            i++;
+
+            // Skip non-alphabetic characters
+            while (i < plainText.length() && !Character.isLetter(plainText.charAt(i))) {
+                result.append(plainText.charAt(i));
+                i++;
+            }
+
+            if (i >= plainText.length()) {
+                // If we have only one letter at the end, add padding
+                result.append(isC1Lower ? Character.toLowerCase(c1) : c1);
+                result.append('X');
+                break;
+            }
+
+            // Get second character of pair and remember its case
+            char c2 = plainText.charAt(i);
+            boolean isC2Lower = Character.isLowerCase(c2);
+            c2 = Character.toUpperCase(c2);
+            i++;
+
+            // Process the pair
+            int[] vec = { c1 - 'A', c2 - 'A' };
+            int enc1 = (k[0][0] * vec[0] + k[0][1] * vec[1]) % 26;
+            int enc2 = (k[1][0] * vec[0] + k[1][1] * vec[1]) % 26;
+            if (enc1 < 0)
+                enc1 += 26;
+            if (enc2 < 0)
+                enc2 += 26;
+
+            // Restore original case
+            result.append(isC1Lower ? Character.toLowerCase((char) ('A' + enc1)) : (char) ('A' + enc1));
+            result.append(isC2Lower ? Character.toLowerCase((char) ('A' + enc2)) : (char) ('A' + enc2));
         }
+
         return result.toString();
     }
 
@@ -59,20 +96,59 @@ public class HillCipher extends TraditionalEncryption {
                 { (-k[1][0] + 26) * detInv % 26, k[0][0] * detInv % 26 }
         };
         StringBuilder result = new StringBuilder();
-        String filtered = cipherText.replaceAll("[^A-Z]", "").toUpperCase();
-        for (int i = 0; i < filtered.length(); i += 2) {
-            int[] vec = { filtered.charAt(i) - 'A', filtered.charAt(i + 1) - 'A' };
-            int p1 = (inv[0][0] * vec[0] + inv[0][1] * vec[1]) % 26;
-            int p2 = (inv[1][0] * vec[0] + inv[1][1] * vec[1]) % 26;
-            if (p1 < 0)
-                p1 += 26;
-            if (p2 < 0)
-                p2 += 26;
-            result.append((char) ('A' + p1));
-            result.append((char) ('A' + p2));
+        int i = 0;
+
+        while (i < cipherText.length()) {
+            // Skip non-alphabetic characters
+            while (i < cipherText.length() && !Character.isLetter(cipherText.charAt(i))) {
+                result.append(cipherText.charAt(i));
+                i++;
+            }
+
+            if (i >= cipherText.length())
+                break;
+
+            // Get first character of pair and remember its case
+            char c1 = cipherText.charAt(i);
+            boolean isC1Lower = Character.isLowerCase(c1);
+            c1 = Character.toUpperCase(c1);
+            i++;
+
+            // Skip non-alphabetic characters
+            while (i < cipherText.length() && !Character.isLetter(cipherText.charAt(i))) {
+                result.append(cipherText.charAt(i));
+                i++;
+            }
+
+            if (i >= cipherText.length()) {
+                // If we have only one letter at the end, just append it
+                result.append(isC1Lower ? Character.toLowerCase(c1) : c1);
+                break;
+            }
+
+            // Get second character of pair and remember its case
+            char c2 = cipherText.charAt(i);
+            boolean isC2Lower = Character.isLowerCase(c2);
+            c2 = Character.toUpperCase(c2);
+            i++;
+
+            // Process the pair
+            int[] vec = { c1 - 'A', c2 - 'A' };
+            int dec1 = (inv[0][0] * vec[0] + inv[0][1] * vec[1]) % 26;
+            int dec2 = (inv[1][0] * vec[0] + inv[1][1] * vec[1]) % 26;
+            if (dec1 < 0)
+                dec1 += 26;
+            if (dec2 < 0)
+                dec2 += 26;
+
+            // Restore original case
+            result.append(isC1Lower ? Character.toLowerCase((char) ('A' + dec1)) : (char) ('A' + dec1));
+            result.append(isC2Lower ? Character.toLowerCase((char) ('A' + dec2)) : (char) ('A' + dec2));
         }
+
         String res = result.toString();
-        if (res.endsWith("X") && cipherText.replaceAll("[^A-Z]", "").length() % 2 != 0) {
+        // Remove padding 'X' if it was added during encryption
+        if (res.endsWith("X") && res.length() > 1) {
             res = res.substring(0, res.length() - 1);
         }
         return res;

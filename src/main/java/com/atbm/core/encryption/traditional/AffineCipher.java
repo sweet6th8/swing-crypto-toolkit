@@ -22,11 +22,12 @@ public class AffineCipher extends TraditionalEncryption {
         int a = Integer.parseInt(parts[0].trim());
         int b = Integer.parseInt(parts[1].trim());
         StringBuilder result = new StringBuilder();
-        for (char c : plainText.toUpperCase().toCharArray()) {
-            if (c >= 'A' && c <= 'Z') {
-                int x = c - 'A';
+        for (char c : plainText.toCharArray()) {
+            if (Character.isLetter(c)) {
+                int base = Character.isLowerCase(c) ? 'a' : 'A';
+                int x = c - base;
                 int enc = (a * x + b) % 26;
-                result.append((char) ('A' + enc));
+                result.append((char) (base + enc));
             } else {
                 result.append(c);
             }
@@ -40,11 +41,12 @@ public class AffineCipher extends TraditionalEncryption {
         int b = Integer.parseInt(parts[1].trim());
         int a_inv = modInverse(a, 26);
         StringBuilder result = new StringBuilder();
-        for (char c : cipherText.toUpperCase().toCharArray()) {
-            if (c >= 'A' && c <= 'Z') {
-                int y = c - 'A';
+        for (char c : cipherText.toCharArray()) {
+            if (Character.isLetter(c)) {
+                int base = Character.isLowerCase(c) ? 'a' : 'A';
+                int y = c - base;
                 int dec = (a_inv * (y - b + 26)) % 26;
-                result.append((char) ('A' + dec));
+                result.append((char) (base + dec));
             } else {
                 result.append(c);
             }

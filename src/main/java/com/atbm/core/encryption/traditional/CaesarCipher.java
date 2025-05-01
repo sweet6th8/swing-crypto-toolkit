@@ -72,7 +72,16 @@ public class CaesarCipher extends TraditionalEncryption {
         int shiftValue = Integer.parseInt(key.trim());
         StringBuilder result = new StringBuilder();
         for (char c : plainText.toCharArray()) {
-            result.append(shiftChar(c, shiftValue));
+            if (Character.isLetter(c)) {
+                int base = Character.isLowerCase(c) ? 'a' : 'A';
+                int x = c - base;
+                int shifted = (x + shiftValue) % 26;
+                if (shifted < 0)
+                    shifted += 26;
+                result.append((char) (base + shifted));
+            } else {
+                result.append(c);
+            }
         }
         return result.toString();
     }
@@ -82,23 +91,17 @@ public class CaesarCipher extends TraditionalEncryption {
         int shiftValue = Integer.parseInt(key.trim());
         StringBuilder result = new StringBuilder();
         for (char c : cipherText.toCharArray()) {
-            result.append(shiftChar(c, -shiftValue));
+            if (Character.isLetter(c)) {
+                int base = Character.isLowerCase(c) ? 'a' : 'A';
+                int x = c - base;
+                int shifted = (x - shiftValue) % 26;
+                if (shifted < 0)
+                    shifted += 26;
+                result.append((char) (base + shifted));
+            } else {
+                result.append(c);
+            }
         }
         return result.toString();
-    }
-
-    private char shiftChar(char c, int shiftAmount) {
-        if (c >= 'a' && c <= 'z') {
-            int shifted = (c - 'a' + shiftAmount) % 26;
-            if (shifted < 0)
-                shifted += 26;
-            return (char) ('a' + shifted);
-        } else if (c >= 'A' && c <= 'Z') {
-            int shifted = (c - 'A' + shiftAmount) % 26;
-            if (shifted < 0)
-                shifted += 26;
-            return (char) ('A' + shifted);
-        }
-        return c;
     }
 }

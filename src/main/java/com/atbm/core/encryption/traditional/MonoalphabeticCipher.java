@@ -11,9 +11,12 @@ public class MonoalphabeticCipher extends TraditionalEncryption {
     public String encrypt(String plainText, String key) {
         StringBuilder result = new StringBuilder();
         String upperKey = key.toUpperCase();
-        for (char c : plainText.toUpperCase().toCharArray()) {
-            if (c >= 'A' && c <= 'Z') {
-                result.append(upperKey.charAt(c - 'A'));
+        for (char c : plainText.toCharArray()) {
+            if (Character.isLetter(c)) {
+                int base = Character.isLowerCase(c) ? 'a' : 'A';
+                char upperC = Character.toUpperCase(c);
+                char encrypted = upperKey.charAt(upperC - 'A');
+                result.append(Character.isLowerCase(c) ? Character.toLowerCase(encrypted) : encrypted);
             } else {
                 result.append(c);
             }
@@ -24,10 +27,12 @@ public class MonoalphabeticCipher extends TraditionalEncryption {
     public String decrypt(String cipherText, String key) {
         StringBuilder result = new StringBuilder();
         String upperKey = key.toUpperCase();
-        for (char c : cipherText.toUpperCase().toCharArray()) {
-            if (c >= 'A' && c <= 'Z') {
-                int idx = upperKey.indexOf(c);
-                result.append((char) ('A' + idx));
+        for (char c : cipherText.toCharArray()) {
+            if (Character.isLetter(c)) {
+                int base = Character.isLowerCase(c) ? 'a' : 'A';
+                char upperC = Character.toUpperCase(c);
+                int idx = upperKey.indexOf(upperC);
+                result.append((char) (base + idx));
             } else {
                 result.append(c);
             }
