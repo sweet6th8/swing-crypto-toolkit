@@ -233,6 +233,17 @@ public class TextEncryptionPanel extends JPanel {
                     return;
                 }
 
+                // Kiểm tra tên file key phải chứa tên thuật toán đang chọn
+                if (!lowerPath.contains(selectedAlgorithm.toLowerCase())) {
+                    loadedKey = null;
+                    keyFilePathField.setText("");
+                    JOptionPane.showMessageDialog(this,
+                            "Tên file key không khớp với thuật toán đang chọn (" + selectedAlgorithm
+                                    + "). Vui lòng chọn đúng file key!",
+                            "Cảnh báo", JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+
                 loadedKey = KeyManager.loadKeyForOperation(keyFilePath, selectedAlgorithm, forEncryption);
 
                 if (loadedKey != null) {
@@ -376,6 +387,19 @@ public class TextEncryptionPanel extends JPanel {
                             + (paddingComboBox.isEnabled() ? " và padding." : "."),
                     "Lỗi " + (encrypt ? "Mã hóa" : "Giải mã"), JOptionPane.ERROR_MESSAGE);
             return;
+        }
+
+        // --- Kiểm tra key có đúng thuật toán không ---
+        if (loadedKey != null) {
+            String keyAlgorithm = loadedKey.getAlgorithm();
+            String selectedAlgorithm = (String) algorithmComboBox.getSelectedItem();
+            if (!keyAlgorithm.equalsIgnoreCase(selectedAlgorithm)) {
+                JOptionPane.showMessageDialog(this,
+                        "Key bạn đang dùng không phù hợp với thuật toán đang chọn (" + selectedAlgorithm
+                                + "). Vui lòng load đúng file key!",
+                        "Cảnh báo", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
         }
 
         // Key Type Validation (Similar to FileEncryptionPanel)
