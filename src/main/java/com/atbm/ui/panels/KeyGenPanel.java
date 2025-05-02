@@ -17,6 +17,12 @@ import com.atbm.core.key.KeyManager;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import com.atbm.utils.KeyUtils;
+import com.atbm.core.encryption.symmetric.AESEncryption;
+import com.atbm.core.encryption.symmetric.DESEncryption;
+import com.atbm.core.encryption.symmetric.DESedeEncryption;
+import com.atbm.core.encryption.symmetric.BlowfishEncryption;
+import com.atbm.core.encryption.symmetric.ChaCha20Poly1305Encryption;
+import com.atbm.core.encryption.asymmetric.RSAEncryption;
 
 public class KeyGenPanel extends JPanel {
 

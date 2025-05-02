@@ -170,11 +170,11 @@ public abstract class SymmetricEncryption implements EncryptionAlgorithm {
     private int getIVLength() {
         switch (algorithm) {
             case "DES":
-                return 8; // DES uses 8-byte IV
             case "DESede":
-                return 8; // Triple DES also uses 8-byte IV
+            case "Blowfish":
+                return 8; // 8 bytes cho DES, DESede, Blowfish
             default:
-                return 16; // Default 16 bytes for AES
+                return 16; // 16 bytes cho AES, ...
         }
     }
 }
