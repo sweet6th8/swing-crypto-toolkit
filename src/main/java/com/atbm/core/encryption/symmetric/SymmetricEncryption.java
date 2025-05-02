@@ -3,7 +3,6 @@ package com.atbm.core.encryption.symmetric;
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
-import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.IvParameterSpec;
 import java.security.Key;
 import java.security.SecureRandom;
@@ -15,11 +14,6 @@ public abstract class SymmetricEncryption implements EncryptionAlgorithm {
     protected String padding;
     protected int keySize;
 
-    // Standard Nonce length for ChaCha20-Poly1305
-    private static final int CHACHA_NONCE_LENGTH_BYTES = 12;
-    // Standard Tag length for ChaCha20-Poly1305 and GCM
-    private static final int AEAD_TAG_LENGTH_BITS = 128;
-
     public SymmetricEncryption(String algorithm, String mode, String padding, int keySize) {
         this.algorithm = algorithm;
         this.mode = mode;
@@ -30,72 +24,84 @@ public abstract class SymmetricEncryption implements EncryptionAlgorithm {
     @Override
     public byte[] encrypt(byte[] data, Key key) throws Exception {
         String transformation;
-        if (algorithm.equals("ChaCha20")) { // Check for ChaCha20
+        if (algorithm.equals("ChaCha20-Poly1305")) {
             transformation = "ChaCha20-Poly1305";
         } else {
             transformation = algorithm + "/" + mode + "/" + padding;
         }
         Cipher cipher = Cipher.getInstance(transformation);
 
-        if (algorithm.equals("ChaCha20")) {
+        // Handle manual padding if NoPadding is selected
+        byte[] dataToEncrypt = data;
+        if (padding.equals("NoPadding") && !algorithm.equals("ChaCha20-Poly1305")) {
+            int blockSize = cipher.getBlockSize();
+            int paddingLength = blockSize - (data.length % blockSize);
+            if (paddingLength > 0 && paddingLength < blockSize) {
+                dataToEncrypt = new byte[data.length + paddingLength];
+                System.arraycopy(data, 0, dataToEncrypt, 0, data.length);
+                // Fill remaining bytes with zeros
+                for (int i = data.length; i < dataToEncrypt.length; i++) {
+                    dataToEncrypt[i] = 0;
+                }
+            }
+        }
+
+        if (algorithm.equals("ChaCha20-Poly1305")) {
             // ChaCha20-Poly1305: generate nonce, encrypt, prepend nonce
-            byte[] nonce = new byte[CHACHA_NONCE_LENGTH_BYTES];
+            byte[] nonce = new byte[12]; // 12 bytes nonce for ChaCha20-Poly1305
             new SecureRandom().nextBytes(nonce);
-            // Using IvParameterSpec instead of GCMParameterSpec due to provider constraint
-            IvParameterSpec parameterSpec = new IvParameterSpec(nonce);
-            cipher.init(Cipher.ENCRYPT_MODE, key, parameterSpec); // Use IvParameterSpec
-            byte[] encryptedData = cipher.doFinal(data);
-            // Prepend nonce to the encrypted data
+            cipher.init(Cipher.ENCRYPT_MODE, key, new IvParameterSpec(nonce));
+            byte[] encryptedData = cipher.doFinal(dataToEncrypt);
+
+            // Combine nonce and encrypted data
             byte[] result = new byte[nonce.length + encryptedData.length];
             System.arraycopy(nonce, 0, result, 0, nonce.length);
             System.arraycopy(encryptedData, 0, result, nonce.length, encryptedData.length);
             return result;
         } else if (mode.equals("CBC")) {
-            // Existing CBC IV handling
+            // Handle IV for CBC mode
             int ivLength = algorithm.equals("DESede") ? 8 : 16;
             byte[] iv = new byte[ivLength];
             new SecureRandom().nextBytes(iv);
             cipher.init(Cipher.ENCRYPT_MODE, key, new IvParameterSpec(iv));
-            byte[] encrypted = cipher.doFinal(data);
+            byte[] encrypted = cipher.doFinal(dataToEncrypt);
             // Prepend IV
             byte[] result = new byte[iv.length + encrypted.length];
             System.arraycopy(iv, 0, result, 0, iv.length);
             System.arraycopy(encrypted, 0, result, iv.length, encrypted.length);
             return result;
         } else {
-            // Other modes (ECB, CFB, OFB) - No IV prepended (OFB/CFB might need IV handling
-            // too, simplified here)
+            // ECB mode - No IV needed
             cipher.init(Cipher.ENCRYPT_MODE, key);
-            return cipher.doFinal(data);
+            return cipher.doFinal(dataToEncrypt);
         }
     }
 
     @Override
     public byte[] decrypt(byte[] encryptedDataWithPrefix, Key key) throws Exception {
         String transformation;
-        if (algorithm.equals("ChaCha20")) { // Check for ChaCha20
+        if (algorithm.equals("ChaCha20-Poly1305")) {
             transformation = "ChaCha20-Poly1305";
         } else {
             transformation = algorithm + "/" + mode + "/" + padding;
         }
         Cipher cipher = Cipher.getInstance(transformation);
 
-        if (algorithm.equals("ChaCha20")) {
-            // ChaCha20-Poly1305: extract nonce, init with nonce, decrypt
-            if (encryptedDataWithPrefix == null || encryptedDataWithPrefix.length < CHACHA_NONCE_LENGTH_BYTES) {
+        if (algorithm.equals("ChaCha20-Poly1305")) {
+            // Extract nonce and encrypted data
+            if (encryptedDataWithPrefix.length < 12) {
                 throw new IllegalArgumentException("Invalid encrypted data length for ChaCha20-Poly1305");
             }
-            byte[] nonce = new byte[CHACHA_NONCE_LENGTH_BYTES];
-            System.arraycopy(encryptedDataWithPrefix, 0, nonce, 0, nonce.length);
-            byte[] actualEncryptedData = new byte[encryptedDataWithPrefix.length - nonce.length];
-            System.arraycopy(encryptedDataWithPrefix, nonce.length, actualEncryptedData, 0, actualEncryptedData.length);
+            byte[] nonce = new byte[12];
+            System.arraycopy(encryptedDataWithPrefix, 0, nonce, 0, 12);
 
-            // Using IvParameterSpec instead of GCMParameterSpec due to provider constraint
-            IvParameterSpec parameterSpec = new IvParameterSpec(nonce);
-            cipher.init(Cipher.DECRYPT_MODE, key, parameterSpec); // Use IvParameterSpec
-            return cipher.doFinal(actualEncryptedData);
+            byte[] encryptedData = new byte[encryptedDataWithPrefix.length - 12];
+            System.arraycopy(encryptedDataWithPrefix, 12, encryptedData, 0, encryptedData.length);
+
+            cipher.init(Cipher.DECRYPT_MODE, key, new IvParameterSpec(nonce));
+            return cipher.doFinal(encryptedData);
         } else if (mode.equals("CBC")) {
-            // Existing CBC IV handling
+            // Handle IV for CBC mode
             int ivLength = algorithm.equals("DESede") ? 8 : 16;
             if (encryptedDataWithPrefix == null || encryptedDataWithPrefix.length < ivLength) {
                 throw new IllegalArgumentException("Invalid encrypted data length for CBC mode");
@@ -104,47 +110,59 @@ public abstract class SymmetricEncryption implements EncryptionAlgorithm {
             System.arraycopy(encryptedDataWithPrefix, 0, iv, 0, iv.length);
             byte[] encrypted = new byte[encryptedDataWithPrefix.length - iv.length];
             System.arraycopy(encryptedDataWithPrefix, iv.length, encrypted, 0, encrypted.length);
-            cipher.init(Cipher.DECRYPT_MODE, key, new IvParameterSpec(iv)); // Init with IV!
-            return cipher.doFinal(encrypted);
+            cipher.init(Cipher.DECRYPT_MODE, key, new IvParameterSpec(iv));
+            byte[] decryptedData = cipher.doFinal(encrypted);
+
+            // Remove padding zeros if NoPadding was used
+            if (padding.equals("NoPadding")) {
+                int i = decryptedData.length - 1;
+                while (i >= 0 && decryptedData[i] == 0) {
+                    i--;
+                }
+                if (i < decryptedData.length - 1) {
+                    byte[] trimmed = new byte[i + 1];
+                    System.arraycopy(decryptedData, 0, trimmed, 0, i + 1);
+                    return trimmed;
+                }
+            }
+            return decryptedData;
         } else {
-            // Other modes (ECB, CFB, OFB) - No IV extracted
+            // ECB mode - No IV needed
             cipher.init(Cipher.DECRYPT_MODE, key);
-            return cipher.doFinal(encryptedDataWithPrefix);
+            byte[] decryptedData = cipher.doFinal(encryptedDataWithPrefix);
+
+            // Remove padding zeros if NoPadding was used
+            if (padding.equals("NoPadding")) {
+                int i = decryptedData.length - 1;
+                while (i >= 0 && decryptedData[i] == 0) {
+                    i--;
+                }
+                if (i < decryptedData.length - 1) {
+                    byte[] trimmed = new byte[i + 1];
+                    System.arraycopy(decryptedData, 0, trimmed, 0, i + 1);
+                    return trimmed;
+                }
+            }
+            return decryptedData;
         }
     }
 
     public SecretKey generateKey() throws Exception {
-        // Use the correct algorithm name for KeyGenerator
-        KeyGenerator keyGen;
-        if (algorithm.equals("ChaCha20")) {
-            keyGen = KeyGenerator.getInstance("ChaCha20"); // JCA uses "ChaCha20" for key gen
-        } else {
-            keyGen = KeyGenerator.getInstance(algorithm);
-        }
+        KeyGenerator keyGen = KeyGenerator.getInstance(algorithm);
         keyGen.init(keySize);
         return keyGen.generateKey();
     }
 
     @Override
     public String[] getSupportedModes() {
-        // ChaCha20 doesn't really have modes in the traditional sense
-        if (algorithm.equals("ChaCha20")) {
-            return new String[] { "None" };
-        }
-        // Return standard modes for others
-        return new String[] { "ECB", "CBC", "CFB", "OFB" };
+        return new String[] { "ECB", "CBC" };
     }
 
     @Override
     public String[] getSupportedPaddings() {
-        // ChaCha20 doesn't use padding
-        if (algorithm.equals("ChaCha20")) {
-            return new String[] { "NoPadding" };
-        }
-        // Return standard paddings for others (adjust based on algo if needed)
         if (algorithm.equals("DESede")) {
             return new String[] { "PKCS5Padding", "NoPadding" };
         }
-        return new String[] { "PKCS5Padding", "NoPadding" /* Add others like ISO10126Padding if supported/needed */ };
+        return new String[] { "PKCS5Padding", "NoPadding" };
     }
 }

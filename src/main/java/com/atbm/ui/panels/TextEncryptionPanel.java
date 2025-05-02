@@ -239,6 +239,7 @@ public class TextEncryptionPanel extends JPanel {
             boolean isChaCha = selectedAlgorithm.equals("ChaCha20-Poly1305");
 
             if (isChaCha) {
+                // ChaCha20-Poly1305 chỉ hỗ trợ None mode và NoPadding
                 modeComboBox.addItem("None");
                 paddingComboBox.addItem("NoPadding");
                 modeComboBox.setSelectedItem("None");
@@ -248,9 +249,6 @@ public class TextEncryptionPanel extends JPanel {
             } else if (isSymmetric) {
                 modeComboBox.addItem("ECB");
                 modeComboBox.addItem("CBC");
-                modeComboBox.addItem("CFB");
-                modeComboBox.addItem("OFB");
-
                 paddingComboBox.addItem("PKCS5Padding");
                 if (selectedAlgorithm.equals("DESede")) {
                     paddingComboBox.addItem("NoPadding");

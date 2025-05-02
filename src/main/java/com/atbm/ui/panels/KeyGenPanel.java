@@ -82,7 +82,7 @@ public class KeyGenPanel extends JPanel {
 
         // Add Action Listeners
         setupActionListeners();
-        updateKeySizes(); // Initial population of key sizes
+        updateKeySizeOptions(); // Initial population of key sizes
     }
 
     private JPanel createAlgorithmSelectionPanel() {
@@ -175,7 +175,7 @@ public class KeyGenPanel extends JPanel {
 
     private void setupActionListeners() {
         algorithmComboBox.addActionListener(e -> {
-            updateKeySizes();
+            updateKeySizeOptions();
             updateBaseFileName();
             generatedKeyObject = null;
             generatedKeyField.setText("");
@@ -192,9 +192,10 @@ public class KeyGenPanel extends JPanel {
         loadKeyButton.addActionListener(e -> loadTraditionalKeyAction());
     }
 
-    private void updateKeySizes() {
+    private void updateKeySizeOptions() {
         String selectedAlgorithm = (String) algorithmComboBox.getSelectedItem();
         keySizeComboBox.removeAllItems();
+
         if (selectedAlgorithm != null) {
             switch (selectedAlgorithm) {
                 case "AES":
@@ -205,7 +206,7 @@ public class KeyGenPanel extends JPanel {
                     break;
                 case "ChaCha20-Poly1305":
                     keySizeComboBox.addItem(256);
-                    keySizeComboBox.setEnabled(false);
+                    keySizeComboBox.setEnabled(false); // Chỉ hỗ trợ 256-bit
                     break;
                 case "DESede":
                     keySizeComboBox.addItem(112);
@@ -480,7 +481,7 @@ public class KeyGenPanel extends JPanel {
     private boolean isSymmetric(String algorithm) {
         if (algorithm == null)
             return false;
-        return algorithm.equals("AES") || algorithm.equals("DESede") || algorithm.equals("ChaCha20-Poly1305");
+        return algorithm.equals("AES") || algorithm.equals("DESede");
     }
 
     private boolean isAsymmetric(String algorithm) {
