@@ -324,14 +324,40 @@ public class FileEncryptionPanel extends JPanel implements DropTargetListener {
                     return; // Or load shift/keyword from file if implemented
                 }
 
+                // Kiểm tra tên file key phải chứa tên thuật toán đang chọn
+                if (!lowerPath.contains(selectedAlgorithm.toLowerCase())) {
+                    loadedKey = null;
+                    keyFilePathField.setText("");
+                    JOptionPane.showMessageDialog(this,
+                            "Tên file key không khớp với thuật toán đang chọn (" + selectedAlgorithm
+                                    + "). Vui lòng chọn đúng file key!",
+                            "Cảnh báo", JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+
                 // Use the refined KeyManager method
                 loadedKey = KeyManager.loadKeyForOperation(keyFilePath, selectedAlgorithm, forEncryption);
 
                 if (loadedKey != null) {
-                    JOptionPane.showMessageDialog(this, "Load khóa thành công!\nThuật toán: " + loadedKey.getAlgorithm()
-                            + "\nĐịnh dạng: " + loadedKey.getFormat(), "Thông báo", JOptionPane.INFORMATION_MESSAGE);
-                } else {
-                    // Should be handled by exceptions or specific messages now
+                    String keyAlgorithm = loadedKey.getAlgorithm();
+                    // Debug log để kiểm tra giá trị thực tế
+                    System.out.println(
+                            "DEBUG: selectedAlgorithm = " + selectedAlgorithm + ", keyAlgorithm = " + keyAlgorithm);
+                    if (!keyAlgorithm.equalsIgnoreCase(selectedAlgorithm)) {
+                        loadedKey = null;
+                        keyFilePathField.setText("");
+                        JOptionPane.showMessageDialog(this,
+                                "Key bạn chọn không phù hợp với thuật toán đang chọn (" + selectedAlgorithm
+                                        + "). Vui lòng chọn đúng file key!\nThuật toán thực tế của key: "
+                                        + keyAlgorithm,
+                                "Cảnh báo", JOptionPane.WARNING_MESSAGE);
+                        return;
+                    } else {
+                        JOptionPane.showMessageDialog(this,
+                                "Load khóa thành công!\nThuật toán: " + loadedKey.getAlgorithm()
+                                        + "\nĐịnh dạng: " + loadedKey.getFormat(),
+                                "Thông báo", JOptionPane.INFORMATION_MESSAGE);
+                    }
                 }
 
             } catch (Exception ex) {
