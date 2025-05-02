@@ -170,6 +170,7 @@ public class FileEncryptionPanel extends JPanel implements DropTargetListener {
                 "AES",
                 "DES",
                 "DESede",
+                "Blowfish",
                 "ChaCha20-Poly1305",
                 "RSA",
                 "Caesar",
@@ -371,7 +372,7 @@ public class FileEncryptionPanel extends JPanel implements DropTargetListener {
 
         if (selectedAlgorithm != null) {
             boolean isSymmetric = selectedAlgorithm.equals("AES") || selectedAlgorithm.equals("DESede")
-                    || selectedAlgorithm.equals("DES");
+                    || selectedAlgorithm.equals("DES") || selectedAlgorithm.equals("Blowfish");
             boolean isAsymmetric = selectedAlgorithm.equals("RSA");
             boolean isChaCha = selectedAlgorithm.equals("ChaCha20-Poly1305");
 

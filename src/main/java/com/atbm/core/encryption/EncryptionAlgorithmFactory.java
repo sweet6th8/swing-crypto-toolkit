@@ -4,6 +4,7 @@ import com.atbm.core.encryption.symmetric.AESEncryption;
 import com.atbm.core.encryption.symmetric.DESedeEncryption;
 import com.atbm.core.encryption.symmetric.DESEncryption;
 import com.atbm.core.encryption.symmetric.ChaCha20Poly1305Encryption;
+import com.atbm.core.encryption.symmetric.BlowfishEncryption;
 import com.atbm.core.encryption.asymmetric.RSAEncryption;
 import com.atbm.core.encryption.traditional.CaesarCipher;
 import com.atbm.core.encryption.traditional.VigenereCipher;
@@ -23,6 +24,8 @@ public class EncryptionAlgorithmFactory {
                 return new DESedeEncryption("CBC", "PKCS5Padding", 168);
             case "chacha20-poly1305":
                 return new ChaCha20Poly1305Encryption();
+            case "blowfish":
+                return new BlowfishEncryption("CBC", "PKCS5Padding");
             case "rsa":
                 return new RSAEncryption(2048);
             case "caesar":
@@ -50,6 +53,8 @@ public class EncryptionAlgorithmFactory {
                 return new DESedeEncryption("CBC", "PKCS5Padding", keySize);
             case "chacha20-poly1305":
                 return new ChaCha20Poly1305Encryption();
+            case "blowfish":
+                return new BlowfishEncryption("CBC", "PKCS5Padding");
             case "rsa":
                 return new RSAEncryption(keySize);
             case "caesar":
@@ -78,6 +83,8 @@ public class EncryptionAlgorithmFactory {
                 return new DESedeEncryption(mode, padding, keySize);
             case "chacha20-poly1305":
                 return new ChaCha20Poly1305Encryption();
+            case "blowfish":
+                return new BlowfishEncryption(mode, padding);
             case "rsa":
                 return new RSAEncryption(keySize);
             case "caesar":

@@ -128,6 +128,7 @@ public class TextEncryptionPanel extends JPanel {
                 "AES",
                 "DES",
                 "DESede",
+                "Blowfish",
                 "ChaCha20-Poly1305",
                 "RSA",
                 "Caesar",
@@ -156,7 +157,21 @@ public class TextEncryptionPanel extends JPanel {
 
     private void setupActionListeners() {
         loadKeyButton.addActionListener(e -> loadKeyFile());
-        algorithmComboBox.addActionListener(e -> updateModesAndPaddings());
+        algorithmComboBox.addActionListener(e -> {
+            // Cảnh báo nếu key đã load không còn phù hợp với thuật toán mới
+            if (loadedKey != null) {
+                String selectedAlgorithm = (String) algorithmComboBox.getSelectedItem();
+                String keyAlgorithm = loadedKey.getAlgorithm();
+                if (selectedAlgorithm != null && !selectedAlgorithm.equalsIgnoreCase(keyAlgorithm)) {
+                    loadedKey = null;
+                    keyFilePathField.setText("");
+                    JOptionPane.showMessageDialog(this,
+                            "Key đã load không phù hợp với thuật toán mới. Vui lòng load lại file key!", "Cảnh báo",
+                            JOptionPane.WARNING_MESSAGE);
+                }
+            }
+            updateModesAndPaddings();
+        });
         encryptButton.addActionListener(e -> performEncryptionDecryption(true));
         decryptButton.addActionListener(e -> performEncryptionDecryption(false));
     }
@@ -221,8 +236,25 @@ public class TextEncryptionPanel extends JPanel {
                 loadedKey = KeyManager.loadKeyForOperation(keyFilePath, selectedAlgorithm, forEncryption);
 
                 if (loadedKey != null) {
-                    JOptionPane.showMessageDialog(this, "Load khóa thành công!\nThuật toán: " + loadedKey.getAlgorithm()
-                            + "\nĐịnh dạng: " + loadedKey.getFormat(), "Thông báo", JOptionPane.INFORMATION_MESSAGE);
+                    String keyAlgorithm = loadedKey.getAlgorithm();
+                    // Debug log để kiểm tra giá trị thực tế
+                    System.out.println(
+                            "DEBUG: selectedAlgorithm = " + selectedAlgorithm + ", keyAlgorithm = " + keyAlgorithm);
+                    if (!keyAlgorithm.equalsIgnoreCase(selectedAlgorithm)) {
+                        loadedKey = null;
+                        keyFilePathField.setText("");
+                        JOptionPane.showMessageDialog(this,
+                                "Key bạn chọn không phù hợp với thuật toán đang chọn (" + selectedAlgorithm
+                                        + "). Vui lòng chọn đúng file key!\nThuật toán thực tế của key: "
+                                        + keyAlgorithm,
+                                "Cảnh báo", JOptionPane.WARNING_MESSAGE);
+                        return;
+                    } else {
+                        JOptionPane.showMessageDialog(this,
+                                "Load khóa thành công!\nThuật toán: " + loadedKey.getAlgorithm()
+                                        + "\nĐịnh dạng: " + loadedKey.getFormat(),
+                                "Thông báo", JOptionPane.INFORMATION_MESSAGE);
+                    }
                 }
 
             } catch (Exception ex) {
@@ -242,6 +274,7 @@ public class TextEncryptionPanel extends JPanel {
         paddingComboBox.removeAllItems();
 
         if (selectedAlgorithm != null) {
+            boolean isBlowfish = selectedAlgorithm.equals("Blowfish");
             boolean isSymmetric = selectedAlgorithm.equals("AES") || selectedAlgorithm.equals("DESede")
                     || selectedAlgorithm.equals("DES");
             boolean isAsymmetric = selectedAlgorithm.equals("RSA");
@@ -255,7 +288,7 @@ public class TextEncryptionPanel extends JPanel {
                 paddingComboBox.setSelectedItem("NoPadding");
                 modeComboBox.setEnabled(false);
                 paddingComboBox.setEnabled(false);
-            } else if (isSymmetric) {
+            } else if (isBlowfish || isSymmetric) {
                 modeComboBox.addItem("ECB");
                 modeComboBox.addItem("CBC");
                 paddingComboBox.addItem("PKCS5Padding");

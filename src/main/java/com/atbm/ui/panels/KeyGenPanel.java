@@ -99,20 +99,7 @@ public class KeyGenPanel extends JPanel {
 
         gbc.gridx = 1;
         gbc.weightx = 1.0;
-        // Thêm Caesar và Vigenere vào danh sách thuật toán
-        algorithmComboBox = new JComboBox<>(
-                new String[] {
-                        "AES",
-                        "DES",
-                        "DESede",
-                        "ChaCha20-Poly1305",
-                        "RSA",
-                        "Caesar",
-                        "Vigenere",
-                        "Monoalphabetic",
-                        "Affine",
-                        "Hill"
-                });
+        initializeAlgorithmComboBox();
         panel.add(algorithmComboBox, gbc);
 
         gbc.gridx = 0;
@@ -126,6 +113,68 @@ public class KeyGenPanel extends JPanel {
         panel.add(keySizeComboBox, gbc);
 
         return panel;
+    }
+
+    private void initializeAlgorithmComboBox() {
+        algorithmComboBox = new JComboBox<>(new String[] {
+                "AES",
+                "DES",
+                "DESede",
+                "Blowfish",
+                "ChaCha20-Poly1305",
+                "RSA",
+                "Caesar",
+                "Vigenere",
+                "Monoalphabetic",
+                "Affine",
+                "Hill"
+        });
+        algorithmComboBox.addActionListener(e -> updateKeySizeComboBox());
+    }
+
+    private void updateKeySizeComboBox() {
+        String selectedAlgorithm = (String) algorithmComboBox.getSelectedItem();
+        DefaultComboBoxModel<Integer> model = new DefaultComboBoxModel<>();
+
+        switch (selectedAlgorithm) {
+            case "AES":
+                for (int size : AESEncryption.SUPPORTED_KEY_SIZES) {
+                    model.addElement(size);
+                }
+                break;
+            case "DES":
+                model.addElement(DESEncryption.KEY_SIZE);
+                break;
+            case "DESede":
+                for (int size : DESedeEncryption.SUPPORTED_KEY_SIZES) {
+                    model.addElement(size);
+                }
+                break;
+            case "Blowfish":
+                for (int size : BlowfishEncryption.SUPPORTED_KEY_SIZES) {
+                    model.addElement(size);
+                }
+                break;
+            case "ChaCha20-Poly1305":
+                model.addElement(ChaCha20Poly1305Encryption.KEY_SIZE);
+                break;
+            case "RSA":
+                for (int size : RSAEncryption.SUPPORTED_KEY_SIZES) {
+                    model.addElement(size);
+                }
+                break;
+            default:
+                // Traditional ciphers don't use key sizes
+                model.addElement(0);
+                break;
+        }
+
+        keySizeComboBox.setModel(model);
+        keySizeComboBox.setEnabled(!selectedAlgorithm.equals("Caesar") &&
+                !selectedAlgorithm.equals("Vigenere") &&
+                !selectedAlgorithm.equals("Monoalphabetic") &&
+                !selectedAlgorithm.equals("Affine") &&
+                !selectedAlgorithm.equals("Hill"));
     }
 
     private JPanel createExportPanel() {
