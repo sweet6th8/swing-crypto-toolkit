@@ -28,6 +28,7 @@ import java.io.FileInputStream;
 import javax.swing.SwingWorker;
 import javax.swing.SwingUtilities;
 import java.util.function.Consumer;
+import java.io.FileOutputStream;
 
 public class FileEncryptionPanel extends JPanel implements DropTargetListener {
 
@@ -541,14 +542,21 @@ public class FileEncryptionPanel extends JPanel implements DropTargetListener {
                                 new SecureRandom().nextBytes(nonce);
                                 cipher.init(javax.crypto.Cipher.ENCRYPT_MODE, loadedKey, new IvParameterSpec(nonce));
                             } else if (mode.equals("CBC")) {
-                                cipher.init(javax.crypto.Cipher.ENCRYPT_MODE, loadedKey);
+                                int ivLength = 16;
+                                if (algorithm.equals("Blowfish") || algorithm.equals("DES")
+                                        || algorithm.equals("DESede")) {
+                                    ivLength = 8;
+                                }
+                                byte[] iv = new byte[ivLength];
+                                new SecureRandom().nextBytes(iv);
+                                cipher.init(javax.crypto.Cipher.ENCRYPT_MODE, loadedKey, new IvParameterSpec(iv));
                             } else {
                                 cipher.init(javax.crypto.Cipher.ENCRYPT_MODE, loadedKey);
                             }
 
                             Consumer<Double> progressCallback = progress -> publish((int) (progress * 100));
                             FileUtils.encryptFile(selectedInputFile.getAbsolutePath(), outputFilePath, cipher, isChaCha,
-                                    progressCallback);
+                                    progressCallback, mode);
                         } else {
                             if (isChaCha) {
                                 byte[] nonce = new byte[12];
@@ -559,7 +567,18 @@ public class FileEncryptionPanel extends JPanel implements DropTargetListener {
                                 }
                                 cipher.init(javax.crypto.Cipher.DECRYPT_MODE, loadedKey, new IvParameterSpec(nonce));
                             } else if (mode.equals("CBC")) {
-                                cipher.init(javax.crypto.Cipher.DECRYPT_MODE, loadedKey);
+                                int ivLength = 16;
+                                if (algorithm.equals("Blowfish") || algorithm.equals("DES")
+                                        || algorithm.equals("DESede")) {
+                                    ivLength = 8;
+                                }
+                                byte[] iv = new byte[ivLength];
+                                try (FileInputStream fis = new FileInputStream(selectedInputFile)) {
+                                    if (fis.read(iv) != ivLength) {
+                                        throw new IOException("File không hợp lệ: không thể đọc IV");
+                                    }
+                                }
+                                cipher.init(javax.crypto.Cipher.DECRYPT_MODE, loadedKey, new IvParameterSpec(iv));
                             } else {
                                 cipher.init(javax.crypto.Cipher.DECRYPT_MODE, loadedKey);
                             }

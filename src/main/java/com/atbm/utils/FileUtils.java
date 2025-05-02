@@ -122,17 +122,14 @@ public class FileUtils {
 
     // Phương thức mã hóa file lớn theo stream
     public static void encryptFile(String inputFile, String outputFile, Cipher cipher, boolean isChaCha20Poly1305,
-            Consumer<Double> progressCallback) throws IOException {
-        byte[] iv = null;
-        if (!isChaCha20Poly1305) {
-            iv = new byte[cipher.getBlockSize()];
-            new SecureRandom().nextBytes(iv);
-        }
+            Consumer<Double> progressCallback, String mode) throws IOException {
+        byte[] iv = cipher.getIV(); // Lấy IV thực tế từ Cipher (nếu có)
 
         try (FileInputStream fis = new FileInputStream(inputFile);
                 FileOutputStream fos = new FileOutputStream(outputFile)) {
 
-            if (iv != null) {
+            // Chỉ ghi IV nếu mode là CBC hoặc các mode cần IV
+            if (iv != null && mode != null && mode.equalsIgnoreCase("CBC")) {
                 fos.write(iv);
             }
 
@@ -151,6 +148,12 @@ public class FileUtils {
                 }
             }
         }
+    }
+
+    // Overload cũ để tương thích
+    public static void encryptFile(String inputFile, String outputFile, Cipher cipher, boolean isChaCha20Poly1305,
+            Consumer<Double> progressCallback) throws IOException {
+        encryptFile(inputFile, outputFile, cipher, isChaCha20Poly1305, progressCallback, null);
     }
 
     // Phương thức giải mã file lớn theo stream
