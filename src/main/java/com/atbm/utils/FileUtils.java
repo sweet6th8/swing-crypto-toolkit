@@ -158,9 +158,9 @@ public class FileUtils {
 
     // Phương thức giải mã file lớn theo stream
     public static void decryptFile(String inputFile, String outputFile, Cipher cipher, boolean isChaCha20Poly1305,
-            Consumer<Double> progressCallback) throws IOException {
+            Consumer<Double> progressCallback, String mode) throws IOException {
         try (FileInputStream fis = new FileInputStream(inputFile)) {
-            if (!isChaCha20Poly1305) {
+            if (!isChaCha20Poly1305 && mode != null && mode.equalsIgnoreCase("CBC")) {
                 byte[] iv = new byte[cipher.getBlockSize()];
                 int bytesRead = fis.read(iv);
                 if (bytesRead != iv.length) {
@@ -185,6 +185,12 @@ public class FileUtils {
                 }
             }
         }
+    }
+
+    // Overload cũ để tương thích
+    public static void decryptFile(String inputFile, String outputFile, Cipher cipher, boolean isChaCha20Poly1305,
+            Consumer<Double> progressCallback) throws IOException {
+        decryptFile(inputFile, outputFile, cipher, isChaCha20Poly1305, progressCallback, null);
     }
 
     // Phương thức cập nhật tiến trình

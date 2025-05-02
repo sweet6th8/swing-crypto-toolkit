@@ -585,7 +585,7 @@ public class FileEncryptionPanel extends JPanel implements DropTargetListener {
 
                             Consumer<Double> progressCallback = progress -> publish((int) (progress * 100));
                             FileUtils.decryptFile(selectedInputFile.getAbsolutePath(), outputFilePath, cipher, isChaCha,
-                                    progressCallback);
+                                    progressCallback, mode);
                         }
                     }
 
