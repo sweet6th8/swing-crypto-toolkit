@@ -101,8 +101,18 @@ public class KeyGenPanel extends JPanel {
         gbc.weightx = 1.0;
         // Thêm Caesar và Vigenere vào danh sách thuật toán
         algorithmComboBox = new JComboBox<>(
-                new String[] { "AES", "DESede", "ChaCha20-Poly1305", "RSA", "Caesar", "Vigenere", "Monoalphabetic",
-                        "Affine", "Hill" });
+                new String[] {
+                        "AES",
+                        "DES",
+                        "DESede",
+                        "ChaCha20-Poly1305",
+                        "RSA",
+                        "Caesar",
+                        "Vigenere",
+                        "Monoalphabetic",
+                        "Affine",
+                        "Hill"
+                });
         panel.add(algorithmComboBox, gbc);
 
         gbc.gridx = 0;

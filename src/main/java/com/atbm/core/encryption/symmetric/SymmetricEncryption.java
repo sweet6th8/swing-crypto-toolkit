@@ -60,7 +60,7 @@ public abstract class SymmetricEncryption implements EncryptionAlgorithm {
             return result;
         } else if (mode.equals("CBC")) {
             // Handle IV for CBC mode
-            int ivLength = algorithm.equals("DESede") ? 8 : 16;
+            int ivLength = getIVLength();
             byte[] iv = new byte[ivLength];
             new SecureRandom().nextBytes(iv);
             cipher.init(Cipher.ENCRYPT_MODE, key, new IvParameterSpec(iv));
@@ -102,7 +102,7 @@ public abstract class SymmetricEncryption implements EncryptionAlgorithm {
             return cipher.doFinal(encryptedData);
         } else if (mode.equals("CBC")) {
             // Handle IV for CBC mode
-            int ivLength = algorithm.equals("DESede") ? 8 : 16;
+            int ivLength = getIVLength();
             if (encryptedDataWithPrefix == null || encryptedDataWithPrefix.length < ivLength) {
                 throw new IllegalArgumentException("Invalid encrypted data length for CBC mode");
             }
@@ -164,5 +164,17 @@ public abstract class SymmetricEncryption implements EncryptionAlgorithm {
             return new String[] { "PKCS5Padding", "NoPadding" };
         }
         return new String[] { "PKCS5Padding", "NoPadding" };
+    }
+
+    // Helper method to get correct IV length based on algorithm
+    private int getIVLength() {
+        switch (algorithm) {
+            case "DES":
+                return 8; // DES uses 8-byte IV
+            case "DESede":
+                return 8; // Triple DES also uses 8-byte IV
+            default:
+                return 16; // Default 16 bytes for AES
+        }
     }
 }

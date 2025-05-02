@@ -151,7 +151,16 @@ public class FileEncryptionPanel extends JPanel implements DropTargetListener {
         JPanel algoPanel = new JPanel(new BorderLayout(5, 0));
         algoPanel.add(new JLabel("Chọn thuật toán:"), BorderLayout.NORTH);
         algorithmComboBox = new JComboBox<>(new String[] {
-                "AES", "DESede", "ChaCha20-Poly1305", "RSA"
+                "AES",
+                "DES",
+                "DESede",
+                "ChaCha20-Poly1305",
+                "RSA",
+                "Caesar",
+                "Vigenere",
+                "Monoalphabetic",
+                "Affine",
+                "Hill"
         });
         algoPanel.add(algorithmComboBox, BorderLayout.CENTER);
         panel.add(algoPanel);
@@ -330,7 +339,8 @@ public class FileEncryptionPanel extends JPanel implements DropTargetListener {
         paddingComboBox.removeAllItems();
 
         if (selectedAlgorithm != null) {
-            boolean isSymmetric = selectedAlgorithm.equals("AES") || selectedAlgorithm.equals("DESede");
+            boolean isSymmetric = selectedAlgorithm.equals("AES") || selectedAlgorithm.equals("DESede")
+                    || selectedAlgorithm.equals("DES");
             boolean isAsymmetric = selectedAlgorithm.equals("RSA");
             boolean isChaCha = selectedAlgorithm.equals("ChaCha20-Poly1305");
 
@@ -346,13 +356,10 @@ public class FileEncryptionPanel extends JPanel implements DropTargetListener {
                 modeComboBox.addItem("ECB");
                 modeComboBox.addItem("CBC");
                 paddingComboBox.addItem("PKCS5Padding");
-                if (selectedAlgorithm.equals("DESede")) {
-                    paddingComboBox.addItem("NoPadding");
-                } else {
-                    paddingComboBox.addItem("NoPadding");
-                }
+                paddingComboBox.addItem("NoPadding");
                 modeComboBox.setEnabled(true);
                 paddingComboBox.setEnabled(true);
+                modeComboBox.setSelectedItem("CBC");
                 paddingComboBox.setSelectedItem("PKCS5Padding");
             } else if (isAsymmetric) {
                 modeComboBox.addItem("ECB");

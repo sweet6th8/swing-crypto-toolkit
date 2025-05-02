@@ -2,6 +2,7 @@ package com.atbm.core.encryption;
 
 import com.atbm.core.encryption.symmetric.AESEncryption;
 import com.atbm.core.encryption.symmetric.DESedeEncryption;
+import com.atbm.core.encryption.symmetric.DESEncryption;
 import com.atbm.core.encryption.symmetric.ChaCha20Poly1305Encryption;
 import com.atbm.core.encryption.asymmetric.RSAEncryption;
 import com.atbm.core.encryption.traditional.CaesarCipher;
@@ -15,6 +16,8 @@ public class EncryptionAlgorithmFactory {
         switch (algorithmName.toLowerCase()) {
             case "aes":
                 return new AESEncryption("CBC", "PKCS5Padding", 256);
+            case "des":
+                return new DESEncryption("CBC", "PKCS5Padding", DESEncryption.KEY_SIZE);
             case "3des":
             case "desede":
                 return new DESedeEncryption("CBC", "PKCS5Padding", 168);
@@ -41,6 +44,8 @@ public class EncryptionAlgorithmFactory {
         switch (algorithmName.toLowerCase()) {
             case "aes":
                 return new AESEncryption("CBC", "PKCS5Padding", keySize);
+            case "des":
+                return new DESEncryption("CBC", "PKCS5Padding", DESEncryption.KEY_SIZE);
             case "desede":
                 return new DESedeEncryption("CBC", "PKCS5Padding", keySize);
             case "chacha20-poly1305":
@@ -67,6 +72,8 @@ public class EncryptionAlgorithmFactory {
         switch (algorithmName.toLowerCase()) {
             case "aes":
                 return new AESEncryption(mode, padding, keySize);
+            case "des":
+                return new DESEncryption(mode, padding, DESEncryption.KEY_SIZE);
             case "desede":
                 return new DESedeEncryption(mode, padding, keySize);
             case "chacha20-poly1305":

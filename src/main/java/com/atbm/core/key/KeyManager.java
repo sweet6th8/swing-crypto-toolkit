@@ -106,7 +106,8 @@ public class KeyManager {
         String lowerPath = filePath.toLowerCase();
         String upperAlgo = algorithm.toUpperCase();
 
-        if (upperAlgo.equals("AES") || upperAlgo.equals("DESEDE") || upperAlgo.equals("CHACHA20-POLY1305")) {
+        if (upperAlgo.equals("AES") || upperAlgo.equals("DES") || upperAlgo.equals("DESEDE")
+                || upperAlgo.equals("CHACHA20-POLY1305")) {
             // Symmetric: Load SecretKey
             if (!lowerPath.endsWith(".key")) {
                 throw new IllegalArgumentException("Expected a .key file for symmetric algorithm " + algorithm);
