@@ -108,7 +108,7 @@ public class KeyManager {
 
         if (upperAlgo.equals("AES") || upperAlgo.equals("DES") || upperAlgo.equals("DESEDE")
                 || upperAlgo.equals("CHACHA20-POLY1305") || upperAlgo.equals("BLOWFISH")
-                || upperAlgo.equals("TWOFISH")) {
+                || upperAlgo.equals("TWOFISH") || upperAlgo.equals("CAMELLIA")) {
             // Symmetric: Load SecretKey
             if (!lowerPath.endsWith(".key")) {
                 throw new IllegalArgumentException("Expected a .key file for symmetric algorithm " + algorithm);
@@ -139,6 +139,12 @@ public class KeyManager {
 
     public static SecretKey generateTwofishKey(int keySize) throws Exception {
         javax.crypto.KeyGenerator keyGen = javax.crypto.KeyGenerator.getInstance("Twofish", "BC");
+        keyGen.init(keySize);
+        return keyGen.generateKey();
+    }
+
+    public static SecretKey generateCamelliaKey(int keySize) throws Exception {
+        javax.crypto.KeyGenerator keyGen = javax.crypto.KeyGenerator.getInstance("Camellia", "BC");
         keyGen.init(keySize);
         return keyGen.generateKey();
     }
