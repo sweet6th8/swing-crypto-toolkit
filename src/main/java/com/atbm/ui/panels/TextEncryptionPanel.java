@@ -133,6 +133,7 @@ public class TextEncryptionPanel extends JPanel {
                 "Twofish",
                 "Camellia",
                 "CAST5",
+                "RC5",
                 "RSA",
                 "Caesar",
                 "Vigenere",

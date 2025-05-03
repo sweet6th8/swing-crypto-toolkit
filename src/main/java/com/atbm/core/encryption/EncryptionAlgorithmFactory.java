@@ -14,6 +14,7 @@ import com.atbm.core.encryption.traditional.HillCipher;
 import com.atbm.core.encryption.symmetric.TwofishEncryption;
 import com.atbm.core.encryption.symmetric.CamelliaEncryption;
 import com.atbm.core.encryption.symmetric.CAST5Encryption;
+import com.atbm.core.encryption.symmetric.RC5Encryption;
 
 public class EncryptionAlgorithmFactory {
     public static EncryptionAlgorithm createAlgorithm(String algorithmName) {
@@ -47,6 +48,8 @@ public class EncryptionAlgorithmFactory {
                 return new CamelliaEncryption("CBC", "PKCS5Padding", 256);
             case "cast5":
                 return new CAST5Encryption("CBC", "PKCS5Padding", 128);
+            case "rc5":
+                return new RC5Encryption("CBC", "PKCS5Padding", 128);
             default:
                 throw new IllegalArgumentException("Unknown algorithm: " + algorithmName);
         }
@@ -82,6 +85,8 @@ public class EncryptionAlgorithmFactory {
                 return new CamelliaEncryption("CBC", "PKCS5Padding", keySize);
             case "cast5":
                 return new CAST5Encryption("CBC", "PKCS5Padding", keySize);
+            case "rc5":
+                return new RC5Encryption("CBC", "PKCS5Padding", keySize);
             default:
                 throw new IllegalArgumentException("Unknown algorithm: " + algorithmName);
         }
@@ -118,6 +123,8 @@ public class EncryptionAlgorithmFactory {
                 return new CamelliaEncryption(mode, padding, keySize);
             case "cast5":
                 return new CAST5Encryption(mode, padding, keySize);
+            case "rc5":
+                return new RC5Encryption(mode, padding, keySize);
             default:
                 throw new IllegalArgumentException("Unknown algorithm: " + algorithmName);
         }

@@ -179,6 +179,7 @@ public class FileEncryptionPanel extends JPanel implements DropTargetListener {
                 "Twofish",
                 "Camellia",
                 "CAST5",
+                "RC5",
                 "RSA",
                 "Caesar",
                 "Vigenere",
