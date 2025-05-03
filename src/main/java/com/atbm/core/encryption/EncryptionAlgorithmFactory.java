@@ -11,6 +11,7 @@ import com.atbm.core.encryption.traditional.VigenereCipher;
 import com.atbm.core.encryption.traditional.MonoalphabeticCipher;
 import com.atbm.core.encryption.traditional.AffineCipher;
 import com.atbm.core.encryption.traditional.HillCipher;
+import com.atbm.core.encryption.symmetric.TwofishEncryption;
 
 public class EncryptionAlgorithmFactory {
     public static EncryptionAlgorithm createAlgorithm(String algorithmName) {
@@ -38,6 +39,8 @@ public class EncryptionAlgorithmFactory {
                 return new AffineCipher();
             case "hill":
                 return new HillCipher();
+            case "twofish":
+                return new TwofishEncryption();
             default:
                 throw new IllegalArgumentException("Unknown algorithm: " + algorithmName);
         }
@@ -67,6 +70,8 @@ public class EncryptionAlgorithmFactory {
                 return new AffineCipher();
             case "hill":
                 return new HillCipher();
+            case "twofish":
+                return new TwofishEncryption();
             default:
                 throw new IllegalArgumentException("Unknown algorithm: " + algorithmName);
         }
@@ -97,6 +102,8 @@ public class EncryptionAlgorithmFactory {
                 return new AffineCipher();
             case "hill":
                 return new HillCipher();
+            case "twofish":
+                return new TwofishEncryption();
             default:
                 throw new IllegalArgumentException("Unknown algorithm: " + algorithmName);
         }
