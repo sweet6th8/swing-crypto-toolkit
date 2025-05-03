@@ -29,6 +29,9 @@ import javax.swing.SwingWorker;
 import javax.swing.SwingUtilities;
 import java.util.function.Consumer;
 import java.io.FileOutputStream;
+import java.security.PublicKey;
+import java.security.PrivateKey;
+import com.atbm.core.encryption.asymmetric.RSAHybridEncryption;
 
 public class FileEncryptionPanel extends JPanel implements DropTargetListener {
 
@@ -520,8 +523,15 @@ public class FileEncryptionPanel extends JPanel implements DropTargetListener {
 
                     // Special handling for RSA with large files
                     if (algorithm.equals("RSA")) {
-                        // RSA hybrid encryption (RSA + AES) remains the same
-                        // ... existing RSA code ...
+                        if (encrypt) {
+                            // Sử dụng RSAHybridEncryption cho mã hóa file
+                            RSAHybridEncryption.encryptFile(selectedInputFile, new File(outputFilePath),
+                                    (PublicKey) loadedKey);
+                        } else {
+                            // Sử dụng RSAHybridEncryption cho giải mã file
+                            RSAHybridEncryption.decryptFile(selectedInputFile, new File(outputFilePath),
+                                    (PrivateKey) loadedKey);
+                        }
                     } else if (algorithm.equals("Caesar") || algorithm.equals("Vigenere")) {
                         // Traditional cipher handling remains the same
                         // ... existing traditional cipher code ...
