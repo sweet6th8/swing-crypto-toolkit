@@ -164,15 +164,26 @@ public class KeyGenPanel extends JPanel {
                 break;
             case "ChaCha20-Poly1305":
                 model.addElement(ChaCha20Poly1305Encryption.KEY_SIZE);
+                keySizeComboBox.setEnabled(false); // Chỉ hỗ trợ 256-bit
+                break;
+            case "Twofish":
+                model.addElement(128);
+                model.addElement(192);
+                model.addElement(256);
+                keySizeComboBox.setEnabled(true);
                 break;
             case "RSA":
                 for (int size : RSAEncryption.SUPPORTED_KEY_SIZES) {
                     model.addElement(size);
                 }
+                keySizeComboBox.setEnabled(true);
+                break;
+            // Ẩn key size cho thuật toán truyền thống
+            case "Caesar":
+            case "Vigenere":
+                keySizeComboBox.setEnabled(false);
                 break;
             default:
-                // Traditional ciphers don't use key sizes
-                model.addElement(0);
                 break;
         }
 
