@@ -626,9 +626,21 @@ public class FileEncryptionPanel extends JPanel implements DropTargetListener {
 
                 } catch (Exception ex) {
                     SwingUtilities.invokeLater(() -> {
-                        JOptionPane.showMessageDialog(FileEncryptionPanel.this,
-                                "Lỗi khi " + operation + ": " + ex.getMessage(), "Lỗi",
-                                JOptionPane.ERROR_MESSAGE);
+                        String msg = ex.getMessage();
+                        if (algorithm.equals("RSA") && !encrypt && msg != null
+                                && (msg.toLowerCase().contains("padding") ||
+                                        msg.toLowerCase().contains("block type") ||
+                                        msg.toLowerCase().contains("block size") ||
+                                        msg.toLowerCase().contains("decryption"))) {
+                            JOptionPane.showMessageDialog(FileEncryptionPanel.this,
+                                    "Lỗi: Kích thước khóa giải mã không khớp với khóa đã dùng để mã hóa. Vui lòng chọn đúng cặp khóa RSA!",
+                                    "Lỗi Giải mã RSA",
+                                    JOptionPane.ERROR_MESSAGE);
+                        } else {
+                            JOptionPane.showMessageDialog(FileEncryptionPanel.this,
+                                    "Lỗi khi " + operation + ": " + msg, "Lỗi",
+                                    JOptionPane.ERROR_MESSAGE);
+                        }
                         ex.printStackTrace();
                     });
                 }
