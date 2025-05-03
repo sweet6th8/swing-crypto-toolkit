@@ -5,115 +5,236 @@ import com.atbm.core.hash.HashAlgorithm;
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.dnd.*;
 import java.io.File;
+import java.util.List;
 
-public class HashPanel extends JPanel {
-    private JComboBox<String> algorithmComboBox;
+public class HashPanel extends JPanel implements DropTargetListener {
+    // Tab components
+    private JTabbedPane tabbedPane;
+    // --- Hash text ---
     private JTextArea inputTextArea;
+    private JComboBox<String> algoTextComboBox;
     private JButton hashTextButton;
-    private JLabel fileLabel;
-    private JButton chooseFileButton;
-    private JButton hashFileButton;
-    private JTextArea resultArea;
+    private JTextArea resultTextArea;
+    private JButton copyTextButton;
+    // --- Hash file ---
+    private JPanel fileDropPanel;
+    private JLabel fileDropLabel;
     private File selectedFile;
+    private JComboBox<String> algoFileComboBox;
+    private JButton hashFileButton;
+    private JTextArea resultFileArea;
+    private JButton copyFileButton;
 
     public HashPanel() {
-        setLayout(new BorderLayout(10, 10));
+        setLayout(new BorderLayout());
+        tabbedPane = new JTabbedPane();
+        tabbedPane.addTab("Hash text", createTextTab());
+        tabbedPane.addTab("Hash file", createFileTab());
+        add(tabbedPane, BorderLayout.CENTER);
+    }
 
-        // Top: Chọn thuật toán
-        JPanel algoPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        algoPanel.setBorder(new TitledBorder("Chọn thuật toán hash"));
-        algorithmComboBox = new JComboBox<>(HashAlgorithm.getSupportedAlgorithms());
-        algoPanel.add(new JLabel("Thuật toán:"));
-        algoPanel.add(algorithmComboBox);
-        add(algoPanel, BorderLayout.NORTH);
+    private JPanel createTextTab() {
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        panel.setBorder(BorderFactory.createEmptyBorder(30, 60, 30, 60));
 
-        // Center: Nhập text hoặc chọn file
-        JPanel centerPanel = new JPanel(new GridLayout(2, 1, 10, 10));
+        JLabel inputLabel = new JLabel("Nhập văn bản");
+        inputLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        panel.add(inputLabel);
+        panel.add(Box.createVerticalStrut(10));
 
-        // Hash text
-        JPanel textPanel = new JPanel(new BorderLayout(5, 5));
-        textPanel.setBorder(new TitledBorder("Hash Text"));
-        inputTextArea = new JTextArea(4, 40);
+        inputTextArea = new JTextArea(7, 40);
+        inputTextArea.setLineWrap(true);
+        inputTextArea.setWrapStyleWord(true);
+        inputTextArea.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 15));
         JScrollPane textScroll = new JScrollPane(inputTextArea);
-        textPanel.add(textScroll, BorderLayout.CENTER);
-        hashTextButton = new JButton("Hash Text");
-        textPanel.add(hashTextButton, BorderLayout.EAST);
-        centerPanel.add(textPanel);
+        panel.add(textScroll);
+        panel.add(Box.createVerticalStrut(20));
 
-        // Hash file
-        JPanel filePanel = new JPanel(new BorderLayout(5, 5));
-        filePanel.setBorder(new TitledBorder("Hash File"));
-        fileLabel = new JLabel("Chưa chọn file");
-        chooseFileButton = new JButton("Chọn File...");
-        hashFileButton = new JButton("Hash File");
-        JPanel fileButtonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        fileButtonPanel.add(chooseFileButton);
-        fileButtonPanel.add(hashFileButton);
-        filePanel.add(fileLabel, BorderLayout.CENTER);
-        filePanel.add(fileButtonPanel, BorderLayout.EAST);
-        centerPanel.add(filePanel);
+        JPanel algoPanel = new JPanel();
+        algoPanel.setLayout(new BoxLayout(algoPanel, BoxLayout.Y_AXIS));
+        JLabel algoLabel = new JLabel("Lựa chọn thuật toán!");
+        algoLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        algoPanel.add(algoLabel);
+        algoPanel.add(Box.createVerticalStrut(5));
+        algoTextComboBox = new JComboBox<>(HashAlgorithm.getSupportedAlgorithms());
+        algoTextComboBox.setMaximumSize(new Dimension(300, 30));
+        algoPanel.add(algoTextComboBox);
+        panel.add(algoPanel);
+        panel.add(Box.createVerticalStrut(20));
 
-        add(centerPanel, BorderLayout.CENTER);
+        hashTextButton = new JButton("Hash văn bản");
+        hashTextButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+        panel.add(hashTextButton);
+        panel.add(Box.createVerticalStrut(20));
 
-        // Bottom: Kết quả
-        JPanel resultPanel = new JPanel(new BorderLayout(5, 5));
-        resultPanel.setBorder(new TitledBorder("Kết quả hash"));
-        resultArea = new JTextArea(3, 40);
-        resultArea.setEditable(false);
-        resultArea.setLineWrap(true);
-        resultArea.setWrapStyleWord(true);
-        JScrollPane resultScroll = new JScrollPane(resultArea);
-        resultPanel.add(resultScroll, BorderLayout.CENTER);
-        add(resultPanel, BorderLayout.SOUTH);
+        JLabel resultLabel = new JLabel("Mã hash");
+        resultLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        panel.add(resultLabel);
+        panel.add(Box.createVerticalStrut(10));
+
+        resultTextArea = new JTextArea(3, 40);
+        resultTextArea.setEditable(false);
+        resultTextArea.setLineWrap(true);
+        resultTextArea.setWrapStyleWord(true);
+        resultTextArea.setFont(new Font(Font.MONOSPACED, Font.BOLD, 16));
+        JScrollPane resultScroll = new JScrollPane(resultTextArea);
+        panel.add(resultScroll);
+        panel.add(Box.createVerticalStrut(10));
+
+        copyTextButton = new JButton("Copy");
+        copyTextButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+        panel.add(copyTextButton);
 
         // Action listeners
         hashTextButton.addActionListener(e -> hashText());
-        chooseFileButton.addActionListener(e -> chooseFile());
-        hashFileButton.addActionListener(e -> hashFile());
+        copyTextButton.addActionListener(e -> copyToClipboard(resultTextArea));
+
+        return panel;
     }
 
+    private JPanel createFileTab() {
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        panel.setBorder(BorderFactory.createEmptyBorder(30, 60, 30, 60));
+
+        // Drop area
+        fileDropPanel = new JPanel(new BorderLayout());
+        fileDropPanel.setPreferredSize(new Dimension(400, 180));
+        fileDropPanel.setMaximumSize(new Dimension(600, 200));
+        fileDropPanel.setBorder(BorderFactory.createDashedBorder(Color.GRAY, 3, 6));
+        fileDropLabel = new JLabel("Drop file into here!", SwingConstants.CENTER);
+        fileDropLabel.setFont(new Font(Font.SERIF, Font.ITALIC, 22));
+        fileDropPanel.add(fileDropLabel, BorderLayout.CENTER);
+        new DropTarget(fileDropPanel, DnDConstants.ACTION_COPY_OR_MOVE, this, true);
+        panel.add(fileDropPanel);
+        panel.add(Box.createVerticalStrut(20));
+
+        JPanel algoPanel = new JPanel();
+        algoPanel.setLayout(new BoxLayout(algoPanel, BoxLayout.Y_AXIS));
+        JLabel algoLabel = new JLabel("Lựa chọn thuật toán!");
+        algoLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        algoPanel.add(algoLabel);
+        algoPanel.add(Box.createVerticalStrut(5));
+        algoFileComboBox = new JComboBox<>(HashAlgorithm.getSupportedAlgorithms());
+        algoFileComboBox.setMaximumSize(new Dimension(300, 30));
+        algoPanel.add(algoFileComboBox);
+        panel.add(algoPanel);
+        panel.add(Box.createVerticalStrut(20));
+
+        hashFileButton = new JButton("Hash file");
+        hashFileButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+        panel.add(hashFileButton);
+        panel.add(Box.createVerticalStrut(20));
+
+        JLabel resultLabel = new JLabel("Mã hash");
+        resultLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        panel.add(resultLabel);
+        panel.add(Box.createVerticalStrut(10));
+
+        resultFileArea = new JTextArea(3, 40);
+        resultFileArea.setEditable(false);
+        resultFileArea.setLineWrap(true);
+        resultFileArea.setWrapStyleWord(true);
+        resultFileArea.setFont(new Font(Font.MONOSPACED, Font.BOLD, 16));
+        JScrollPane resultScroll = new JScrollPane(resultFileArea);
+        panel.add(resultScroll);
+        panel.add(Box.createVerticalStrut(10));
+
+        copyFileButton = new JButton("Copy");
+        copyFileButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+        panel.add(copyFileButton);
+
+        // Action listeners
+        hashFileButton.addActionListener(e -> hashFile());
+        copyFileButton.addActionListener(e -> copyToClipboard(resultFileArea));
+
+        return panel;
+    }
+
+    // --- Hash logic ---
     private void hashText() {
         String text = inputTextArea.getText();
-        String algo = (String) algorithmComboBox.getSelectedItem();
+        String algo = (String) algoTextComboBox.getSelectedItem();
         if (text == null || text.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Vui lòng nhập text để hash.", "Lỗi", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Vui lòng nhập văn bản để hash.", "Lỗi", JOptionPane.ERROR_MESSAGE);
             return;
         }
         try {
             String hash = HashAlgorithm.hashText(text, algo);
-            resultArea.setText(hash);
+            resultTextArea.setText(hash);
         } catch (Exception ex) {
-            resultArea.setText("");
-            JOptionPane.showMessageDialog(this, "Lỗi khi hash text: " + ex.getMessage(), "Lỗi",
+            resultTextArea.setText("");
+            JOptionPane.showMessageDialog(this, "Lỗi khi hash văn bản: " + ex.getMessage(), "Lỗi",
                     JOptionPane.ERROR_MESSAGE);
-        }
-    }
-
-    private void chooseFile() {
-        JFileChooser fileChooser = new JFileChooser();
-        int result = fileChooser.showOpenDialog(this);
-        if (result == JFileChooser.APPROVE_OPTION) {
-            selectedFile = fileChooser.getSelectedFile();
-            fileLabel.setText(selectedFile.getAbsolutePath());
         }
     }
 
     private void hashFile() {
         if (selectedFile == null) {
-            JOptionPane.showMessageDialog(this, "Vui lòng chọn file để hash.", "Lỗi", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Vui lòng kéo thả hoặc chọn file để hash.", "Lỗi",
+                    JOptionPane.ERROR_MESSAGE);
             return;
         }
-        String algo = (String) algorithmComboBox.getSelectedItem();
+        String algo = (String) algoFileComboBox.getSelectedItem();
         try {
             String hash = HashAlgorithm.hashFile(selectedFile, algo);
-            resultArea.setText(hash);
+            resultFileArea.setText(hash);
         } catch (Exception ex) {
-            resultArea.setText("");
+            resultFileArea.setText("");
             JOptionPane.showMessageDialog(this, "Lỗi khi hash file: " + ex.getMessage(), "Lỗi",
                     JOptionPane.ERROR_MESSAGE);
         }
+    }
+
+    private void copyToClipboard(JTextArea area) {
+        String hash = area.getText();
+        if (hash != null && !hash.isEmpty()) {
+            Toolkit.getDefaultToolkit().getSystemClipboard()
+                    .setContents(new java.awt.datatransfer.StringSelection(hash), null);
+            JOptionPane.showMessageDialog(this, "Đã copy kết quả hash vào clipboard!", "Thông báo",
+                    JOptionPane.INFORMATION_MESSAGE);
+        }
+    }
+
+    // --- DropTargetListener for file tab ---
+    @Override
+    public void dragEnter(DropTargetDragEvent dtde) {
+        fileDropPanel.setBorder(BorderFactory.createLineBorder(Color.BLUE, 2));
+    }
+
+    @Override
+    public void dragOver(DropTargetDragEvent dtde) {
+    }
+
+    @Override
+    public void dropActionChanged(DropTargetDragEvent dtde) {
+    }
+
+    @Override
+    public void dragExit(DropTargetEvent dte) {
+        fileDropPanel.setBorder(BorderFactory.createDashedBorder(Color.GRAY, 3, 6));
+    }
+
+    @Override
+    public void drop(DropTargetDropEvent dtde) {
+        try {
+            dtde.acceptDrop(DnDConstants.ACTION_COPY);
+            List<File> droppedFiles = (List<File>) dtde.getTransferable()
+                    .getTransferData(DataFlavor.javaFileListFlavor);
+            if (droppedFiles != null && !droppedFiles.isEmpty()) {
+                selectedFile = droppedFiles.get(0);
+                fileDropLabel.setText(selectedFile.getAbsolutePath());
+                fileDropLabel.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 16));
+                fileDropLabel.setForeground(Color.BLACK);
+            }
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Lỗi khi kéo thả file: " + ex.getMessage(), "Lỗi",
+                    JOptionPane.ERROR_MESSAGE);
+        }
+        fileDropPanel.setBorder(BorderFactory.createDashedBorder(Color.GRAY, 3, 6));
     }
 }

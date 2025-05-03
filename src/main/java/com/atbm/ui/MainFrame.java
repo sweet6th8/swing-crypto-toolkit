@@ -4,6 +4,7 @@ import com.atbm.ui.panels.KeyGenPanel;
 import com.atbm.ui.panels.TextEncryptionPanel;
 import com.atbm.ui.panels.FileEncryptionPanel;
 import com.atbm.ui.panels.KeyListPanel;
+import com.atbm.ui.panels.HashPanel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -45,7 +46,7 @@ public class MainFrame extends JFrame {
         mainContentPanel.add(new KeyGenPanel(), KEY_GEN_PANEL); // Use actual KeyGenPanel
         mainContentPanel.add(new FileEncryptionPanel(), FILE_ENC_PANEL); // Use actual FileEncryptionPanel
         mainContentPanel.add(new TextEncryptionPanel(), TEXT_ENC_PANEL); // Use actual TextEncryptionPanel
-        mainContentPanel.add(new JPanel(), HASH_PANEL);
+        mainContentPanel.add(new HashPanel(), HASH_PANEL);
         mainContentPanel.add(new JPanel(), SIGNATURE_PANEL);
         mainContentPanel.add(new JPanel(), ABOUT_PANEL);
         // TODO: Replace placeholder JPanels with actual functional panels
