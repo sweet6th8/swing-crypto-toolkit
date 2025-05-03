@@ -399,39 +399,67 @@ public class FileEncryptionPanel extends JPanel implements DropTargetListener {
     private void updateModesAndPaddings() {
         String selectedAlgorithm = (String) algorithmComboBox.getSelectedItem();
         DefaultComboBoxModel<String> modeModel = new DefaultComboBoxModel<>();
-        DefaultComboBoxModel<String> paddingModel = new DefaultComboBoxModel<>();
 
-        if (selectedAlgorithm != null) {
-            if (selectedAlgorithm.equals("ChaCha20-Poly1305")) {
-                // ChaCha20-Poly1305 không cần mode và padding
-                modeModel.addElement("N/A");
-                paddingModel.addElement("N/A");
-            } else if (selectedAlgorithm.equals("RSA")) {
-                // RSA không cần mode và padding
-                modeModel.addElement("N/A");
-                paddingModel.addElement("N/A");
-            } else if (isTraditionalAlgorithm(selectedAlgorithm)) {
-                // Thuật toán truyền thống không cần mode và padding
-                modeModel.addElement("N/A");
-                paddingModel.addElement("N/A");
-            } else {
-                // Các thuật toán đối xứng (bao gồm Twofish)
-                modeModel.addElement("ECB");
-                modeModel.addElement("CBC");
-                paddingModel.addElement("PKCS5Padding");
-                paddingModel.addElement("NoPadding");
-            }
+        if (selectedAlgorithm != null && selectedAlgorithm.equals("Twofish")) {
+            // Twofish: chỉ cho phép ECB và CBC
+            modeModel.addElement("ECB");
+            modeModel.addElement("CBC");
+        } else if (selectedAlgorithm != null && !selectedAlgorithm.equals("ChaCha20-Poly1305")
+                && !selectedAlgorithm.equals("RSA") && !isTraditionalAlgorithm(selectedAlgorithm)) {
+            // Các thuật toán đối xứng khác
+            modeModel.addElement("ECB");
+            modeModel.addElement("CBC");
+        } else if (selectedAlgorithm != null && selectedAlgorithm.equals("ChaCha20-Poly1305")) {
+            modeModel.addElement("N/A");
+        } else if (selectedAlgorithm != null && selectedAlgorithm.equals("RSA")) {
+            modeModel.addElement("N/A");
+        } else if (selectedAlgorithm != null && isTraditionalAlgorithm(selectedAlgorithm)) {
+            modeModel.addElement("N/A");
         }
 
         modeComboBox.setModel(modeModel);
-        paddingComboBox.setModel(paddingModel);
-
-        // Disable mode and padding selection for algorithms that don't use them
-        boolean enableSelection = !selectedAlgorithm.equals("ChaCha20-Poly1305") &&
+        updatePaddingForMode();
+        boolean enableSelection = selectedAlgorithm != null && !selectedAlgorithm.equals("ChaCha20-Poly1305") &&
                 !selectedAlgorithm.equals("RSA") &&
                 !isTraditionalAlgorithm(selectedAlgorithm);
         modeComboBox.setEnabled(enableSelection);
         paddingComboBox.setEnabled(enableSelection);
+        modeComboBox.addActionListener(e -> updatePaddingForMode());
+    }
+
+    private void updatePaddingForMode() {
+        String selectedAlgorithm = (String) algorithmComboBox.getSelectedItem();
+        String selectedMode = (String) modeComboBox.getSelectedItem();
+        DefaultComboBoxModel<String> paddingModel = new DefaultComboBoxModel<>();
+        if (selectedAlgorithm != null && selectedAlgorithm.equals("Twofish")) {
+            if (selectedMode == null) {
+                paddingComboBox.setModel(paddingModel);
+                return;
+            }
+            switch (selectedMode) {
+                case "ECB":
+                    paddingModel.addElement("NoPadding");
+                    break;
+                case "CBC":
+                    paddingModel.addElement("PKCS5Padding");
+                    paddingModel.addElement("NoPadding");
+                    break;
+                default:
+                    break;
+            }
+        } else if (selectedAlgorithm != null && !selectedAlgorithm.equals("ChaCha20-Poly1305")
+                && !selectedAlgorithm.equals("RSA") && !isTraditionalAlgorithm(selectedAlgorithm)) {
+            // Các thuật toán đối xứng khác
+            paddingModel.addElement("PKCS5Padding");
+            paddingModel.addElement("NoPadding");
+        } else if (selectedAlgorithm != null && selectedAlgorithm.equals("ChaCha20-Poly1305")) {
+            paddingModel.addElement("N/A");
+        } else if (selectedAlgorithm != null && selectedAlgorithm.equals("RSA")) {
+            paddingModel.addElement("N/A");
+        } else if (selectedAlgorithm != null && isTraditionalAlgorithm(selectedAlgorithm)) {
+            paddingModel.addElement("N/A");
+        }
+        paddingComboBox.setModel(paddingModel);
     }
 
     private void performEncryptionDecryption(boolean encrypt) {

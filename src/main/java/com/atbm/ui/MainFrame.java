@@ -5,11 +5,17 @@ import com.atbm.ui.panels.TextEncryptionPanel;
 import com.atbm.ui.panels.FileEncryptionPanel;
 import com.atbm.ui.panels.KeyListPanel;
 import com.atbm.ui.panels.HashPanel;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import java.security.Security;
 
 import javax.swing.*;
 import java.awt.*;
 
 public class MainFrame extends JFrame {
+    static {
+        Security.addProvider(new BouncyCastleProvider());
+    }
+
     private JSplitPane splitPane;
     private KeyListPanel keyListPanel;
     private JPanel mainContentPanel; // Panel using CardLayout

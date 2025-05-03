@@ -103,7 +103,7 @@ public class EncryptionAlgorithmFactory {
             case "hill":
                 return new HillCipher();
             case "twofish":
-                return new TwofishEncryption("CBC", "PKCS5Padding", keySize);
+                return new TwofishEncryption(mode, padding, keySize);
             default:
                 throw new IllegalArgumentException("Unknown algorithm: " + algorithmName);
         }
