@@ -169,9 +169,10 @@ public abstract class SymmetricEncryption implements EncryptionAlgorithm {
             case "DES":
             case "DESede":
             case "Blowfish":
-                return 8; // 8 bytes cho DES, DESede, Blowfish
+            case "CAST5":
+                return 8; // 8 bytes cho DES, DESede, Blowfish, CAST5
             default:
-                return 16; // 16 bytes cho AES, ...
+                return 16; // 16 bytes cho AES, Camellia, Twofish, ...
         }
     }
 }
