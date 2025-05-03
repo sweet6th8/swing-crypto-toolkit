@@ -17,6 +17,9 @@ public class RSAEncryption extends AsymmetricEncryption {
     // Default padding for simplicity, could be configurable
     private String padding = "PKCS1Padding";
 
+    // Ngưỡng kích thước dữ liệu để sử dụng hybrid encryption (bytes)
+    private static final int HYBRID_THRESHOLD = 100;
+
     public RSAEncryption(int keySize) {
         super("RSA", validateKeySize(keySize));
     }
@@ -49,20 +52,34 @@ public class RSAEncryption extends AsymmetricEncryption {
 
     /**
      * Encrypts data using the public key.
+     * Uses hybrid encryption for large data.
      */
     public byte[] encryptWithPublicKey(byte[] data, PublicKey publicKey) throws Exception {
-        Cipher cipher = Cipher.getInstance(algorithm + "/ECB/" + padding); // Mode often ECB for raw RSA
+        // Sử dụng hybrid encryption cho dữ liệu lớn
+        if (data.length > HYBRID_THRESHOLD) {
+            return RSAHybridEncryption.encrypt(data, publicKey);
+        }
+
+        // Sử dụng RSA trực tiếp cho dữ liệu nhỏ
+        Cipher cipher = Cipher.getInstance(algorithm + "/ECB/" + padding);
         cipher.init(Cipher.ENCRYPT_MODE, publicKey);
         return cipher.doFinal(data);
     }
 
     /**
      * Decrypts data using the private key.
+     * Handles both direct RSA and hybrid encryption.
      */
     public byte[] decryptWithPrivateKey(byte[] encryptedData, PrivateKey privateKey) throws Exception {
-        Cipher cipher = Cipher.getInstance(algorithm + "/ECB/" + padding); // Mode often ECB for raw RSA
-        cipher.init(Cipher.DECRYPT_MODE, privateKey);
-        return cipher.doFinal(encryptedData);
+        try {
+            // Thử giải mã bằng RSA trực tiếp trước
+            Cipher cipher = Cipher.getInstance(algorithm + "/ECB/" + padding);
+            cipher.init(Cipher.DECRYPT_MODE, privateKey);
+            return cipher.doFinal(encryptedData);
+        } catch (Exception e) {
+            // Nếu thất bại, thử giải mã bằng hybrid encryption
+            return RSAHybridEncryption.decrypt(encryptedData, privateKey);
+        }
     }
 
     // --- Interface Methods (Adaptation) ---
