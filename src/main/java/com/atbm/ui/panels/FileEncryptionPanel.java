@@ -177,6 +177,7 @@ public class FileEncryptionPanel extends JPanel implements DropTargetListener {
                 "Blowfish",
                 "ChaCha20-Poly1305",
                 "Twofish",
+                "Camellia",
                 "RSA",
                 "Caesar",
                 "Vigenere",

@@ -12,6 +12,7 @@ import com.atbm.core.encryption.traditional.MonoalphabeticCipher;
 import com.atbm.core.encryption.traditional.AffineCipher;
 import com.atbm.core.encryption.traditional.HillCipher;
 import com.atbm.core.encryption.symmetric.TwofishEncryption;
+import com.atbm.core.encryption.symmetric.CamelliaEncryption;
 
 public class EncryptionAlgorithmFactory {
     public static EncryptionAlgorithm createAlgorithm(String algorithmName) {
@@ -41,6 +42,8 @@ public class EncryptionAlgorithmFactory {
                 return new HillCipher();
             case "twofish":
                 return new TwofishEncryption("CBC", "PKCS5Padding", 256);
+            case "camellia":
+                return new CamelliaEncryption("CBC", "PKCS5Padding", 256);
             default:
                 throw new IllegalArgumentException("Unknown algorithm: " + algorithmName);
         }
@@ -72,6 +75,8 @@ public class EncryptionAlgorithmFactory {
                 return new HillCipher();
             case "twofish":
                 return new TwofishEncryption("CBC", "PKCS5Padding", keySize);
+            case "camellia":
+                return new CamelliaEncryption("CBC", "PKCS5Padding", keySize);
             default:
                 throw new IllegalArgumentException("Unknown algorithm: " + algorithmName);
         }
@@ -104,6 +109,8 @@ public class EncryptionAlgorithmFactory {
                 return new HillCipher();
             case "twofish":
                 return new TwofishEncryption(mode, padding, keySize);
+            case "camellia":
+                return new CamelliaEncryption(mode, padding, keySize);
             default:
                 throw new IllegalArgumentException("Unknown algorithm: " + algorithmName);
         }

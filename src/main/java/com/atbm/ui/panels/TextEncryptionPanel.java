@@ -131,6 +131,7 @@ public class TextEncryptionPanel extends JPanel {
                 "Blowfish",
                 "ChaCha20-Poly1305",
                 "Twofish",
+                "Camellia",
                 "RSA",
                 "Caesar",
                 "Vigenere",

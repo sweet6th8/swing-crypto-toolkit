@@ -129,6 +129,7 @@ public class KeyGenPanel extends JPanel {
                 "Blowfish",
                 "ChaCha20-Poly1305",
                 "Twofish",
+                "Camellia",
                 "RSA",
                 "Caesar",
                 "Vigenere",
@@ -167,6 +168,12 @@ public class KeyGenPanel extends JPanel {
                 keySizeComboBox.setEnabled(false); // Chỉ hỗ trợ 256-bit
                 break;
             case "Twofish":
+                model.addElement(128);
+                model.addElement(192);
+                model.addElement(256);
+                keySizeComboBox.setEnabled(true);
+                break;
+            case "Camellia":
                 model.addElement(128);
                 model.addElement(192);
                 model.addElement(256);
@@ -289,6 +296,12 @@ public class KeyGenPanel extends JPanel {
                     keySizeComboBox.addItem(112);
                     keySizeComboBox.addItem(168);
                     keySizeComboBox.setSelectedItem(168);
+                    keySizeComboBox.setEnabled(true);
+                    break;
+                case "Camellia":
+                    keySizeComboBox.addItem(128);
+                    keySizeComboBox.addItem(192);
+                    keySizeComboBox.addItem(256);
                     keySizeComboBox.setEnabled(true);
                     break;
                 case "RSA":
@@ -558,7 +571,7 @@ public class KeyGenPanel extends JPanel {
     private boolean isSymmetric(String algorithm) {
         if (algorithm == null)
             return false;
-        return algorithm.equals("AES") || algorithm.equals("DESede");
+        return algorithm.equals("AES") || algorithm.equals("DESede") || algorithm.equals("Camellia");
     }
 
     private boolean isAsymmetric(String algorithm) {
