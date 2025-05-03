@@ -7,8 +7,15 @@ import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.GeneralSecurityException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 
 public class RSAHybridEncryption {
     private static final String AES_ALGORITHM = "AES";
@@ -28,41 +35,63 @@ public class RSAHybridEncryption {
      * @return Dữ liệu đã mã hóa theo định dạng: [MAGIC_NUMBER][IV length (4
      *         bytes)][IV][encrypted
      *         AES key length (4 bytes)][encrypted AES key][encrypted data]
-     * @throws Exception Nếu có lỗi trong quá trình mã hóa
+     * @throws GeneralSecurityException Nếu có lỗi trong quá trình mã hóa
      */
-    public static byte[] encrypt(byte[] data, PublicKey publicKey) throws Exception {
-        // 1. Tạo khóa AES ngẫu nhiên
-        KeyGenerator keyGen = KeyGenerator.getInstance(AES_ALGORITHM);
-        keyGen.init(AES_KEY_SIZE);
-        SecretKey aesKey = keyGen.generateKey();
+    public static byte[] encrypt(byte[] data, PublicKey publicKey) throws GeneralSecurityException {
+        if (data == null) {
+            throw new IllegalArgumentException("Data cannot be null");
+        }
+        if (publicKey == null) {
+            throw new IllegalArgumentException("Public key cannot be null");
+        }
+        if (data.length == 0) {
+            throw new IllegalArgumentException("Data cannot be empty");
+        }
 
-        // 2. Mã hóa dữ liệu bằng AES
-        Cipher aesCipher = Cipher.getInstance(AES_TRANSFORMATION);
-        aesCipher.init(Cipher.ENCRYPT_MODE, aesKey);
-        byte[] encryptedData = aesCipher.doFinal(data);
-        byte[] iv = aesCipher.getIV();
+        try {
+            // 1. Tạo khóa AES ngẫu nhiên
+            KeyGenerator keyGen = KeyGenerator.getInstance(AES_ALGORITHM);
+            keyGen.init(AES_KEY_SIZE);
+            SecretKey aesKey = keyGen.generateKey();
 
-        // 3. Mã hóa khóa AES bằng RSA
-        Cipher rsaCipher = Cipher.getInstance(RSA_TRANSFORMATION);
-        rsaCipher.init(Cipher.ENCRYPT_MODE, publicKey);
-        byte[] encryptedAesKey = rsaCipher.doFinal(aesKey.getEncoded());
+            // 2. Mã hóa dữ liệu bằng AES
+            Cipher aesCipher = Cipher.getInstance(AES_TRANSFORMATION);
+            aesCipher.init(Cipher.ENCRYPT_MODE, aesKey);
+            byte[] encryptedData = aesCipher.doFinal(data);
+            byte[] iv = aesCipher.getIV();
 
-        // 4. Kết hợp tất cả dữ liệu
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        // Ghi magic number
-        outputStream.write(MAGIC_NUMBER);
-        // Ghi độ dài IV
-        outputStream.write(intToBytes(iv.length));
-        // Ghi IV
-        outputStream.write(iv);
-        // Ghi độ dài khóa AES đã mã hóa
-        outputStream.write(intToBytes(encryptedAesKey.length));
-        // Ghi khóa AES đã mã hóa
-        outputStream.write(encryptedAesKey);
-        // Ghi dữ liệu đã mã hóa
-        outputStream.write(encryptedData);
+            // 3. Mã hóa khóa AES bằng RSA
+            Cipher rsaCipher = Cipher.getInstance(RSA_TRANSFORMATION);
+            rsaCipher.init(Cipher.ENCRYPT_MODE, publicKey);
+            byte[] encryptedAesKey = rsaCipher.doFinal(aesKey.getEncoded());
 
-        return outputStream.toByteArray();
+            // 4. Kết hợp tất cả dữ liệu
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            try {
+                // Ghi magic number
+                outputStream.write(MAGIC_NUMBER);
+                // Ghi độ dài IV
+                outputStream.write(intToBytes(iv.length));
+                // Ghi IV
+                outputStream.write(iv);
+                // Ghi độ dài khóa AES đã mã hóa
+                outputStream.write(intToBytes(encryptedAesKey.length));
+                // Ghi khóa AES đã mã hóa
+                outputStream.write(encryptedAesKey);
+                // Ghi dữ liệu đã mã hóa
+                outputStream.write(encryptedData);
+            } catch (IOException e) {
+                throw new GeneralSecurityException("Error writing encrypted data: " + e.getMessage(), e);
+            }
+
+            return outputStream.toByteArray();
+        } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
+            throw new GeneralSecurityException("Error initializing encryption algorithm: " + e.getMessage(), e);
+        } catch (InvalidKeyException e) {
+            throw new GeneralSecurityException("Invalid key: " + e.getMessage(), e);
+        } catch (IllegalBlockSizeException | BadPaddingException e) {
+            throw new GeneralSecurityException("Error during encryption: " + e.getMessage(), e);
+        }
     }
 
     /**
@@ -71,48 +100,95 @@ public class RSAHybridEncryption {
      * @param encryptedData Dữ liệu đã mã hóa
      * @param privateKey    Khóa bí mật RSA
      * @return Dữ liệu đã giải mã
-     * @throws Exception Nếu có lỗi trong quá trình giải mã
+     * @throws GeneralSecurityException Nếu có lỗi trong quá trình giải mã
      */
-    public static byte[] decrypt(byte[] encryptedData, PrivateKey privateKey) throws Exception {
-        ByteArrayInputStream inputStream = new ByteArrayInputStream(encryptedData);
-
-        // 1. Kiểm tra magic number
-        byte[] magic = new byte[MAGIC_NUMBER_LENGTH];
-        inputStream.read(magic);
-        if (!isValidMagicNumber(magic)) {
-            throw new Exception("Dữ liệu không hợp lệ: không phải file hybrid");
+    public static byte[] decrypt(byte[] encryptedData, PrivateKey privateKey) throws GeneralSecurityException {
+        if (encryptedData == null) {
+            throw new IllegalArgumentException("Encrypted data cannot be null");
+        }
+        if (privateKey == null) {
+            throw new IllegalArgumentException("Private key cannot be null");
+        }
+        if (encryptedData.length < MAGIC_NUMBER_LENGTH + 8) { // Minimum size: magic + IV length + AES key length
+            throw new IllegalArgumentException("Encrypted data is too short");
         }
 
-        // 2. Đọc IV length và IV
-        byte[] ivLengthBytes = new byte[4];
-        inputStream.read(ivLengthBytes);
-        int ivLength = bytesToInt(ivLengthBytes);
+        try {
+            ByteArrayInputStream inputStream = new ByteArrayInputStream(encryptedData);
 
-        byte[] iv = new byte[ivLength];
-        inputStream.read(iv);
+            // 1. Kiểm tra magic number
+            byte[] magic = new byte[MAGIC_NUMBER_LENGTH];
+            if (readBytes(inputStream, magic) != MAGIC_NUMBER_LENGTH || !isValidMagicNumber(magic)) {
+                throw new GeneralSecurityException("Invalid data format: not a hybrid encrypted file");
+            }
 
-        // 3. Đọc độ dài và dữ liệu khóa AES đã mã hóa
-        byte[] aesKeyLengthBytes = new byte[4];
-        inputStream.read(aesKeyLengthBytes);
-        int aesKeyLength = bytesToInt(aesKeyLengthBytes);
+            // 2. Đọc IV length và IV
+            byte[] ivLengthBytes = new byte[4];
+            if (readBytes(inputStream, ivLengthBytes) != 4) {
+                throw new GeneralSecurityException("Invalid data format: cannot read IV length");
+            }
+            int ivLength = bytesToInt(ivLengthBytes);
+            if (ivLength <= 0 || ivLength > 16) { // AES IV is always 16 bytes
+                throw new GeneralSecurityException("Invalid IV length: " + ivLength);
+            }
 
-        byte[] encryptedAesKey = new byte[aesKeyLength];
-        inputStream.read(encryptedAesKey);
+            byte[] iv = new byte[ivLength];
+            if (readBytes(inputStream, iv) != ivLength) {
+                throw new GeneralSecurityException("Invalid data format: cannot read IV");
+            }
 
-        // 4. Giải mã khóa AES bằng RSA
-        Cipher rsaCipher = Cipher.getInstance(RSA_TRANSFORMATION);
-        rsaCipher.init(Cipher.DECRYPT_MODE, privateKey);
-        byte[] aesKeyBytes = rsaCipher.doFinal(encryptedAesKey);
+            // 3. Đọc độ dài và dữ liệu khóa AES đã mã hóa
+            byte[] aesKeyLengthBytes = new byte[4];
+            if (readBytes(inputStream, aesKeyLengthBytes) != 4) {
+                throw new GeneralSecurityException("Invalid data format: cannot read AES key length");
+            }
+            int aesKeyLength = bytesToInt(aesKeyLengthBytes);
+            if (aesKeyLength <= 0 || aesKeyLength > 512) { // Reasonable limit for RSA encrypted AES key
+                throw new GeneralSecurityException("Invalid AES key length: " + aesKeyLength);
+            }
 
-        // 5. Tạo lại khóa AES
-        SecretKey aesKey = new SecretKeySpec(aesKeyBytes, AES_ALGORITHM);
+            byte[] encryptedAesKey = new byte[aesKeyLength];
+            if (readBytes(inputStream, encryptedAesKey) != aesKeyLength) {
+                throw new GeneralSecurityException("Invalid data format: cannot read AES key");
+            }
 
-        // 6. Giải mã dữ liệu bằng AES
-        Cipher aesCipher = Cipher.getInstance(AES_TRANSFORMATION);
-        aesCipher.init(Cipher.DECRYPT_MODE, aesKey, new IvParameterSpec(iv));
+            // 4. Giải mã khóa AES bằng RSA
+            Cipher rsaCipher = Cipher.getInstance(RSA_TRANSFORMATION);
+            rsaCipher.init(Cipher.DECRYPT_MODE, privateKey);
+            byte[] aesKeyBytes = rsaCipher.doFinal(encryptedAesKey);
 
-        byte[] remainingData = inputStream.readAllBytes();
-        return aesCipher.doFinal(remainingData);
+            // 5. Tạo lại khóa AES
+            SecretKey aesKey = new SecretKeySpec(aesKeyBytes, AES_ALGORITHM);
+
+            // 6. Giải mã dữ liệu bằng AES
+            Cipher aesCipher = Cipher.getInstance(AES_TRANSFORMATION);
+            aesCipher.init(Cipher.DECRYPT_MODE, aesKey, new IvParameterSpec(iv));
+
+            byte[] remainingData = inputStream.readAllBytes();
+            if (remainingData.length == 0) {
+                throw new GeneralSecurityException("No encrypted data found");
+            }
+            return aesCipher.doFinal(remainingData);
+        } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
+            throw new GeneralSecurityException("Error initializing decryption algorithm: " + e.getMessage(), e);
+        } catch (InvalidKeyException e) {
+            throw new GeneralSecurityException("Invalid key: " + e.getMessage(), e);
+        } catch (IllegalBlockSizeException | BadPaddingException e) {
+            throw new GeneralSecurityException("Error during decryption: " + e.getMessage(), e);
+        } catch (IOException e) {
+            throw new GeneralSecurityException("Error reading encrypted data: " + e.getMessage(), e);
+        }
+    }
+
+    // Helper method để đọc bytes từ input stream
+    private static int readBytes(ByteArrayInputStream inputStream, byte[] buffer) throws IOException {
+        int totalRead = 0;
+        int read;
+        while (totalRead < buffer.length
+                && (read = inputStream.read(buffer, totalRead, buffer.length - totalRead)) != -1) {
+            totalRead += read;
+        }
+        return totalRead;
     }
 
     // Kiểm tra magic number có hợp lệ không
@@ -140,6 +216,9 @@ public class RSAHybridEncryption {
 
     // Chuyển đổi byte array thành int
     private static int bytesToInt(byte[] bytes) {
+        if (bytes.length != 4) {
+            throw new IllegalArgumentException("Byte array length must be 4");
+        }
         return ((bytes[0] & 0xFF) << 24) |
                 ((bytes[1] & 0xFF) << 16) |
                 ((bytes[2] & 0xFF) << 8) |
