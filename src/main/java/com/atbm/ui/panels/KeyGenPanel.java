@@ -130,6 +130,7 @@ public class KeyGenPanel extends JPanel {
                 "ChaCha20-Poly1305",
                 "Twofish",
                 "Camellia",
+                "CAST5",
                 "RSA",
                 "Caesar",
                 "Vigenere",
@@ -177,6 +178,15 @@ public class KeyGenPanel extends JPanel {
                 model.addElement(128);
                 model.addElement(192);
                 model.addElement(256);
+                keySizeComboBox.setEnabled(true);
+                break;
+            case "CAST5":
+                model.addElement(40);
+                model.addElement(64);
+                model.addElement(80);
+                model.addElement(96);
+                model.addElement(112);
+                model.addElement(128);
                 keySizeComboBox.setEnabled(true);
                 break;
             case "RSA":
