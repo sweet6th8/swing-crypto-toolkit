@@ -27,6 +27,7 @@ public class HashPanel extends JPanel implements DropTargetListener {
     private JButton hashFileButton;
     private JTextArea resultFileArea;
     private JButton copyFileButton;
+    private JProgressBar fileProgressBar;
 
     public HashPanel() {
         setLayout(new BorderLayout());
@@ -113,6 +114,13 @@ public class HashPanel extends JPanel implements DropTargetListener {
         panel.add(fileDropPanel);
         panel.add(Box.createVerticalStrut(20));
 
+        // Progress bar
+        fileProgressBar = new JProgressBar(0, 100);
+        fileProgressBar.setStringPainted(true);
+        fileProgressBar.setVisible(false);
+        panel.add(fileProgressBar);
+        panel.add(Box.createVerticalStrut(10));
+
         JPanel algoPanel = new JPanel();
         algoPanel.setLayout(new BoxLayout(algoPanel, BoxLayout.Y_AXIS));
         JLabel algoLabel = new JLabel("Lựa chọn thuật toán!");
@@ -149,7 +157,7 @@ public class HashPanel extends JPanel implements DropTargetListener {
         panel.add(copyFileButton);
 
         // Action listeners
-        hashFileButton.addActionListener(e -> hashFile());
+        hashFileButton.addActionListener(e -> hashFileWithProgress());
         copyFileButton.addActionListener(e -> copyToClipboard(resultFileArea));
 
         return panel;
@@ -236,5 +244,74 @@ public class HashPanel extends JPanel implements DropTargetListener {
                     JOptionPane.ERROR_MESSAGE);
         }
         fileDropPanel.setBorder(BorderFactory.createDashedBorder(Color.GRAY, 3, 6));
+    }
+
+    // Hash file with progress bar
+    private void hashFileWithProgress() {
+        if (selectedFile == null) {
+            JOptionPane.showMessageDialog(this, "Vui lòng kéo thả hoặc chọn file để hash.", "Lỗi",
+                    JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        String algo = (String) algoFileComboBox.getSelectedItem();
+        fileProgressBar.setValue(0);
+        fileProgressBar.setVisible(true);
+        resultFileArea.setText("");
+        hashFileButton.setEnabled(false);
+        copyFileButton.setEnabled(false);
+
+        SwingWorker<String, Integer> worker = new SwingWorker<>() {
+            @Override
+            protected String doInBackground() throws Exception {
+                long total = selectedFile.length();
+                long processed = 0;
+                int bufferSize = 8192;
+                java.security.MessageDigest md = java.security.MessageDigest.getInstance(algo);
+                try (java.io.FileInputStream fis = new java.io.FileInputStream(selectedFile)) {
+                    byte[] buffer = new byte[bufferSize];
+                    int bytesRead;
+                    while ((bytesRead = fis.read(buffer)) != -1) {
+                        md.update(buffer, 0, bytesRead);
+                        processed += bytesRead;
+                        int percent = (int) ((processed * 100) / total);
+                        setProgress(percent);
+                    }
+                }
+                byte[] hashBytes = md.digest();
+                StringBuilder sb = new StringBuilder();
+                for (byte b : hashBytes) {
+                    sb.append(String.format("%02x", b));
+                }
+                return sb.toString();
+            }
+
+            @Override
+            protected void process(java.util.List<Integer> chunks) {
+                if (!chunks.isEmpty()) {
+                    fileProgressBar.setValue(chunks.get(chunks.size() - 1));
+                }
+            }
+
+            @Override
+            protected void done() {
+                try {
+                    String hash = get();
+                    resultFileArea.setText(hash);
+                } catch (Exception ex) {
+                    resultFileArea.setText("");
+                    JOptionPane.showMessageDialog(HashPanel.this, "Lỗi khi hash file: " + ex.getMessage(), "Lỗi",
+                            JOptionPane.ERROR_MESSAGE);
+                }
+                fileProgressBar.setVisible(false);
+                hashFileButton.setEnabled(true);
+                copyFileButton.setEnabled(true);
+            }
+        };
+        worker.addPropertyChangeListener(evt -> {
+            if ("progress".equals(evt.getPropertyName())) {
+                fileProgressBar.setValue((Integer) evt.getNewValue());
+            }
+        });
+        worker.execute();
     }
 }
