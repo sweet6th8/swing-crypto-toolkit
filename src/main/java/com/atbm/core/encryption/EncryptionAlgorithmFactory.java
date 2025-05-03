@@ -13,7 +13,6 @@ import com.atbm.core.encryption.traditional.AffineCipher;
 import com.atbm.core.encryption.traditional.HillCipher;
 import com.atbm.core.encryption.symmetric.TwofishEncryption;
 import com.atbm.core.encryption.symmetric.CamelliaEncryption;
-import com.atbm.core.encryption.symmetric.MISTY1Encryption;
 
 public class EncryptionAlgorithmFactory {
     public static EncryptionAlgorithm createAlgorithm(String algorithmName) {
@@ -45,8 +44,6 @@ public class EncryptionAlgorithmFactory {
                 return new TwofishEncryption("CBC", "PKCS5Padding", 256);
             case "camellia":
                 return new CamelliaEncryption("CBC", "PKCS5Padding", 256);
-            case "misty1":
-                return new MISTY1Encryption("CBC", "PKCS5Padding", 128);
             default:
                 throw new IllegalArgumentException("Unknown algorithm: " + algorithmName);
         }
@@ -80,8 +77,6 @@ public class EncryptionAlgorithmFactory {
                 return new TwofishEncryption("CBC", "PKCS5Padding", keySize);
             case "camellia":
                 return new CamelliaEncryption("CBC", "PKCS5Padding", keySize);
-            case "misty1":
-                return new MISTY1Encryption("CBC", "PKCS5Padding", 128);
             default:
                 throw new IllegalArgumentException("Unknown algorithm: " + algorithmName);
         }
@@ -116,8 +111,6 @@ public class EncryptionAlgorithmFactory {
                 return new TwofishEncryption(mode, padding, keySize);
             case "camellia":
                 return new CamelliaEncryption(mode, padding, keySize);
-            case "misty1":
-                return new MISTY1Encryption(mode, padding, 128);
             default:
                 throw new IllegalArgumentException("Unknown algorithm: " + algorithmName);
         }

@@ -108,7 +108,7 @@ public class KeyManager {
 
         if (upperAlgo.equals("AES") || upperAlgo.equals("DES") || upperAlgo.equals("DESEDE")
                 || upperAlgo.equals("CHACHA20-POLY1305") || upperAlgo.equals("BLOWFISH")
-                || upperAlgo.equals("TWOFISH") || upperAlgo.equals("CAMELLIA") || upperAlgo.equals("MISTY1")) {
+                || upperAlgo.equals("TWOFISH") || upperAlgo.equals("CAMELLIA")) {
             // Symmetric: Load SecretKey
             if (!lowerPath.endsWith(".key")) {
                 throw new IllegalArgumentException("Expected a .key file for symmetric algorithm " + algorithm);
@@ -147,12 +147,5 @@ public class KeyManager {
         javax.crypto.KeyGenerator keyGen = javax.crypto.KeyGenerator.getInstance("Camellia", "BC");
         keyGen.init(keySize);
         return keyGen.generateKey();
-    }
-
-    // Tạo key thủ công do MISTY1 không hỗ trợ KeyGenerator
-    public static SecretKey generateMISTY1Key() {
-        byte[] keyBytes = new byte[16]; // 128 bit
-        new java.security.SecureRandom().nextBytes(keyBytes);
-        return new javax.crypto.spec.SecretKeySpec(keyBytes, "MISTY1");
     }
 }
