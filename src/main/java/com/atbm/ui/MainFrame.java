@@ -99,12 +99,6 @@ public class MainFrame extends JFrame {
             cardLayout.show(mainContentPanel, FILE_ENC_PANEL);
         });
         fileMenu.add(fileAsymItem);
-        JMenuItem fileTradItem = new JMenuItem("Cổ điển");
-        fileTradItem.addActionListener(e -> {
-            ((FileEncryptionPanel) mainContentPanel.getComponent(2)).setAlgorithmType("Traditional");
-            cardLayout.show(mainContentPanel, FILE_ENC_PANEL);
-        });
-        fileMenu.add(fileTradItem);
         menuBar.add(fileMenu);
 
         // --- Văn bản Menu ---
