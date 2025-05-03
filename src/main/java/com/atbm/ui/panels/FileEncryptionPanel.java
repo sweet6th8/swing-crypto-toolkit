@@ -524,11 +524,19 @@ public class FileEncryptionPanel extends JPanel implements DropTargetListener {
                     // Special handling for RSA with large files
                     if (algorithm.equals("RSA")) {
                         if (encrypt) {
-                            // Sử dụng RSAHybridEncryption cho mã hóa file
                             RSAHybridEncryption.encryptFile(selectedInputFile, new File(outputFilePath),
                                     (PublicKey) loadedKey);
                         } else {
-                            // Sử dụng RSAHybridEncryption cho giải mã file
+                            // Kiểm tra đúng loại khóa trước khi giải mã
+                            if (!(loadedKey instanceof PrivateKey)) {
+                                SwingUtilities.invokeLater(() -> {
+                                    JOptionPane.showMessageDialog(FileEncryptionPanel.this,
+                                            "Giải mã RSA yêu cầu khóa bí mật (.pri). Vui lòng chọn đúng file khóa bí mật!",
+                                            "Lỗi Key",
+                                            JOptionPane.ERROR_MESSAGE);
+                                });
+                                return null;
+                            }
                             RSAHybridEncryption.decryptFile(selectedInputFile, new File(outputFilePath),
                                     (PrivateKey) loadedKey);
                         }
