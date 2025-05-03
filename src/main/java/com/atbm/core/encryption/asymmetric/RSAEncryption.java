@@ -18,7 +18,9 @@ public class RSAEncryption extends AsymmetricEncryption {
     private String padding = "PKCS1Padding";
 
     // Ngưỡng kích thước dữ liệu để sử dụng hybrid encryption (bytes)
-    private static final int HYBRID_THRESHOLD = 100;
+    // Giá trị này được tính toán dựa trên kích thước khóa RSA và padding
+    // Với PKCS1Padding, kích thước tối đa có thể mã hóa = keySize/8 - 11 bytes
+    private static final int HYBRID_THRESHOLD = 100; // Có thể điều chỉnh tùy theo nhu cầu
 
     public RSAEncryption(int keySize) {
         super("RSA", validateKeySize(keySize));
@@ -45,6 +47,32 @@ public class RSAEncryption extends AsymmetricEncryption {
         return keySize;
     }
 
+    /**
+     * Tính toán ngưỡng kích thước dữ liệu để sử dụng hybrid encryption
+     * Dựa trên kích thước khóa RSA và padding scheme
+     * 
+     * @param keySize Kích thước khóa RSA (bits)
+     * @param padding Padding scheme
+     * @return Ngưỡng kích thước dữ liệu (bytes)
+     */
+    private static int calculateHybridThreshold(int keySize, String padding) {
+        // Với PKCS1Padding, kích thước tối đa có thể mã hóa = keySize/8 - 11 bytes
+        if (padding.equals("PKCS1Padding")) {
+            return (keySize / 8) - 11;
+        }
+        // Với OAEP, kích thước tối đa có thể mã hóa = keySize/8 - 42 bytes
+        else if (padding.equals("OAEPWithSHA-1AndMGF1Padding") ||
+                padding.equals("OAEPWithSHA-256AndMGF1Padding")) {
+            return (keySize / 8) - 42;
+        }
+        // Với NoPadding, kích thước tối đa có thể mã hóa = keySize/8 bytes
+        else if (padding.equals("NoPadding")) {
+            return keySize / 8;
+        }
+        // Mặc định sử dụng PKCS1Padding
+        return (keySize / 8) - 11;
+    }
+
     @Override
     public String getName() {
         return "RSA";
@@ -56,7 +84,7 @@ public class RSAEncryption extends AsymmetricEncryption {
      */
     public byte[] encryptWithPublicKey(byte[] data, PublicKey publicKey) throws Exception {
         // Sử dụng hybrid encryption cho dữ liệu lớn
-        if (data.length > HYBRID_THRESHOLD) {
+        if (data.length > calculateHybridThreshold(keySize, padding)) {
             return RSAHybridEncryption.encrypt(data, publicKey);
         }
 
