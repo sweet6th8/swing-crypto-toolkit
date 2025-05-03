@@ -160,9 +160,6 @@ public abstract class SymmetricEncryption implements EncryptionAlgorithm {
 
     @Override
     public String[] getSupportedPaddings() {
-        if (algorithm.equals("DESede")) {
-            return new String[] { "PKCS5Padding", "NoPadding" };
-        }
         return new String[] { "PKCS5Padding", "NoPadding" };
     }
 

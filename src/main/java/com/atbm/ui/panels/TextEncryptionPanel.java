@@ -282,53 +282,40 @@ public class TextEncryptionPanel extends JPanel {
 
     private void updateModesAndPaddings() {
         String selectedAlgorithm = (String) algorithmComboBox.getSelectedItem();
-        modeComboBox.removeAllItems();
-        paddingComboBox.removeAllItems();
+        DefaultComboBoxModel<String> modeModel = new DefaultComboBoxModel<>();
+        DefaultComboBoxModel<String> paddingModel = new DefaultComboBoxModel<>();
 
         if (selectedAlgorithm != null) {
-            boolean isBlowfish = selectedAlgorithm.equals("Blowfish");
-            boolean isSymmetric = selectedAlgorithm.equals("AES") || selectedAlgorithm.equals("DESede")
-                    || selectedAlgorithm.equals("DES");
-            boolean isAsymmetric = selectedAlgorithm.equals("RSA");
-            boolean isChaCha = selectedAlgorithm.equals("ChaCha20-Poly1305");
-
-            if (isChaCha) {
-                // ChaCha20-Poly1305 chỉ hỗ trợ None mode và NoPadding
-                modeComboBox.addItem("None");
-                paddingComboBox.addItem("NoPadding");
-                modeComboBox.setSelectedItem("None");
-                paddingComboBox.setSelectedItem("NoPadding");
-                modeComboBox.setEnabled(false);
-                paddingComboBox.setEnabled(false);
-            } else if (isBlowfish || isSymmetric) {
-                modeComboBox.addItem("ECB");
-                modeComboBox.addItem("CBC");
-                paddingComboBox.addItem("PKCS5Padding");
-                paddingComboBox.addItem("NoPadding");
-                modeComboBox.setEnabled(true);
-                paddingComboBox.setEnabled(true);
-                modeComboBox.setSelectedItem("CBC");
-                paddingComboBox.setSelectedItem("PKCS5Padding");
-            } else if (isAsymmetric) {
-                modeComboBox.addItem("ECB");
-                modeComboBox.setEnabled(false);
-                paddingComboBox.addItem("PKCS1Padding");
-                paddingComboBox.addItem("OAEPWithSHA-1AndMGF1Padding");
-                paddingComboBox.addItem("OAEPWithSHA-256AndMGF1Padding");
-                paddingComboBox.addItem("NoPadding");
-                paddingComboBox.setEnabled(true);
+            if (selectedAlgorithm.equals("ChaCha20-Poly1305")) {
+                // ChaCha20-Poly1305 không cần mode và padding
+                modeModel.addElement("N/A");
+                paddingModel.addElement("N/A");
+            } else if (selectedAlgorithm.equals("RSA")) {
+                // RSA không cần mode và padding
+                modeModel.addElement("N/A");
+                paddingModel.addElement("N/A");
+            } else if (isTraditionalAlgorithm(selectedAlgorithm)) {
+                // Thuật toán truyền thống không cần mode và padding
+                modeModel.addElement("N/A");
+                paddingModel.addElement("N/A");
             } else {
-                modeComboBox.addItem("None");
-                paddingComboBox.addItem("NoPadding");
-                modeComboBox.setSelectedItem("None");
-                paddingComboBox.setSelectedItem("NoPadding");
-                modeComboBox.setEnabled(false);
-                paddingComboBox.setEnabled(false);
+                // Các thuật toán đối xứng (bao gồm Twofish)
+                modeModel.addElement("ECB");
+                modeModel.addElement("CBC");
+                paddingModel.addElement("PKCS5Padding");
+                paddingModel.addElement("NoPadding");
             }
-        } else {
-            modeComboBox.setEnabled(false);
-            paddingComboBox.setEnabled(false);
         }
+
+        modeComboBox.setModel(modeModel);
+        paddingComboBox.setModel(paddingModel);
+
+        // Disable mode and padding selection for algorithms that don't use them
+        boolean enableSelection = !selectedAlgorithm.equals("ChaCha20-Poly1305") &&
+                !selectedAlgorithm.equals("RSA") &&
+                !isTraditionalAlgorithm(selectedAlgorithm);
+        modeComboBox.setEnabled(enableSelection);
+        paddingComboBox.setEnabled(enableSelection);
     }
 
     private void performEncryptionDecryption(boolean encrypt) {

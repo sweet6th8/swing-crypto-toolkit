@@ -24,14 +24,4 @@ public class DESEncryption extends SymmetricEncryption {
     public String getName() {
         return "DES";
     }
-
-    @Override
-    public String[] getSupportedModes() {
-        return new String[] { "ECB", "CBC" };
-    }
-
-    @Override
-    public String[] getSupportedPaddings() {
-        return new String[] { "PKCS5Padding", "NoPadding" };
-    }
 }
