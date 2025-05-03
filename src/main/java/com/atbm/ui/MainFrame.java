@@ -87,64 +87,46 @@ public class MainFrame extends JFrame {
 
         // --- File Menu ---
         JMenu fileMenu = new JMenu(FILE_ENC_PANEL);
-        JMenu fileEncryptMenu = new JMenu("Đối xứng");
-        JMenuItem fileEncryptSymItem = new JMenuItem("Mã hóa");
-        JMenuItem fileDecryptSymItem = new JMenuItem("Giải mã");
-        fileEncryptSymItem.addActionListener(e -> cardLayout.show(mainContentPanel, FILE_ENC_PANEL)); // Show file panel
-        fileDecryptSymItem.addActionListener(e -> cardLayout.show(mainContentPanel, FILE_ENC_PANEL)); // Show file panel
-        fileEncryptMenu.add(fileEncryptSymItem);
-        fileEncryptMenu.add(fileDecryptSymItem);
-
-        JMenu fileEncryptAsymMenu = new JMenu("Bất đối xứng");
-        JMenuItem fileEncryptAsymItem = new JMenuItem("Mã hóa");
-        JMenuItem fileDecryptAsymItem = new JMenuItem("Giải mã");
-        fileEncryptAsymItem.addActionListener(e -> cardLayout.show(mainContentPanel, FILE_ENC_PANEL));
-        fileDecryptAsymItem.addActionListener(e -> cardLayout.show(mainContentPanel, FILE_ENC_PANEL));
-        fileEncryptAsymMenu.add(fileEncryptAsymItem);
-        fileEncryptAsymMenu.add(fileDecryptAsymItem);
-
-        JMenu fileEncryptTradMenu = new JMenu("Cổ điển");
-        JMenuItem fileEncryptTradItem = new JMenuItem("Mã hóa");
-        JMenuItem fileDecryptTradItem = new JMenuItem("Giải mã");
-        fileEncryptTradItem.addActionListener(e -> cardLayout.show(mainContentPanel, FILE_ENC_PANEL));
-        fileDecryptTradItem.addActionListener(e -> cardLayout.show(mainContentPanel, FILE_ENC_PANEL));
-        fileEncryptTradMenu.add(fileEncryptTradItem);
-        fileEncryptTradMenu.add(fileDecryptTradItem);
-
-        fileMenu.add(fileEncryptMenu);
-        fileMenu.add(fileEncryptAsymMenu);
-        fileMenu.add(fileEncryptTradMenu);
+        JMenuItem fileSymItem = new JMenuItem("Đối xứng");
+        fileSymItem.addActionListener(e -> {
+            ((FileEncryptionPanel) mainContentPanel.getComponent(2)).setAlgorithmType("Symmetric");
+            cardLayout.show(mainContentPanel, FILE_ENC_PANEL);
+        });
+        fileMenu.add(fileSymItem);
+        JMenuItem fileAsymItem = new JMenuItem("Bất đối xứng");
+        fileAsymItem.addActionListener(e -> {
+            ((FileEncryptionPanel) mainContentPanel.getComponent(2)).setAlgorithmType("Asymmetric");
+            cardLayout.show(mainContentPanel, FILE_ENC_PANEL);
+        });
+        fileMenu.add(fileAsymItem);
+        JMenuItem fileTradItem = new JMenuItem("Cổ điển");
+        fileTradItem.addActionListener(e -> {
+            ((FileEncryptionPanel) mainContentPanel.getComponent(2)).setAlgorithmType("Traditional");
+            cardLayout.show(mainContentPanel, FILE_ENC_PANEL);
+        });
+        fileMenu.add(fileTradItem);
         menuBar.add(fileMenu);
 
         // --- Văn bản Menu ---
         JMenu textMenu = new JMenu(TEXT_ENC_PANEL);
-        JMenu textEncryptMenu = new JMenu("Đối xứng");
-        JMenuItem textEncryptSymItem = new JMenuItem("Mã hóa");
-        JMenuItem textDecryptSymItem = new JMenuItem("Giải mã");
-        textEncryptSymItem.addActionListener(e -> cardLayout.show(mainContentPanel, TEXT_ENC_PANEL)); // Show text panel
-        textDecryptSymItem.addActionListener(e -> cardLayout.show(mainContentPanel, TEXT_ENC_PANEL)); // Show text panel
-        textEncryptMenu.add(textEncryptSymItem);
-        textEncryptMenu.add(textDecryptSymItem);
-
-        JMenu textEncryptAsymMenu = new JMenu("Bất đối xứng");
-        JMenuItem textEncryptAsymItem = new JMenuItem("Mã hóa");
-        JMenuItem textDecryptAsymItem = new JMenuItem("Giải mã");
-        textEncryptAsymItem.addActionListener(e -> cardLayout.show(mainContentPanel, TEXT_ENC_PANEL));
-        textDecryptAsymItem.addActionListener(e -> cardLayout.show(mainContentPanel, TEXT_ENC_PANEL));
-        textEncryptAsymMenu.add(textEncryptAsymItem);
-        textEncryptAsymMenu.add(textDecryptAsymItem);
-
-        JMenu textEncryptTradMenu = new JMenu("Cổ điển");
-        JMenuItem textEncryptTradItem = new JMenuItem("Mã hóa");
-        JMenuItem textDecryptTradItem = new JMenuItem("Giải mã");
-        textEncryptTradItem.addActionListener(e -> cardLayout.show(mainContentPanel, TEXT_ENC_PANEL));
-        textDecryptTradItem.addActionListener(e -> cardLayout.show(mainContentPanel, TEXT_ENC_PANEL));
-        textEncryptTradMenu.add(textEncryptTradItem);
-        textEncryptTradMenu.add(textDecryptTradItem);
-
-        textMenu.add(textEncryptMenu);
-        textMenu.add(textEncryptAsymMenu);
-        textMenu.add(textEncryptTradMenu);
+        JMenuItem textSymItem = new JMenuItem("Đối xứng");
+        textSymItem.addActionListener(e -> {
+            ((TextEncryptionPanel) mainContentPanel.getComponent(3)).setAlgorithmType("Symmetric");
+            cardLayout.show(mainContentPanel, TEXT_ENC_PANEL);
+        });
+        textMenu.add(textSymItem);
+        JMenuItem textAsymItem = new JMenuItem("Bất đối xứng");
+        textAsymItem.addActionListener(e -> {
+            ((TextEncryptionPanel) mainContentPanel.getComponent(3)).setAlgorithmType("Asymmetric");
+            cardLayout.show(mainContentPanel, TEXT_ENC_PANEL);
+        });
+        textMenu.add(textAsymItem);
+        JMenuItem textTradItem = new JMenuItem("Cổ điển");
+        textTradItem.addActionListener(e -> {
+            ((TextEncryptionPanel) mainContentPanel.getComponent(3)).setAlgorithmType("Traditional");
+            cardLayout.show(mainContentPanel, TEXT_ENC_PANEL);
+        });
+        textMenu.add(textTradItem);
         menuBar.add(textMenu);
 
         // --- Hash Menu ---

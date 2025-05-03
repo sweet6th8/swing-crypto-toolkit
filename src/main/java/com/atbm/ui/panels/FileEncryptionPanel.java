@@ -54,6 +54,8 @@ public class FileEncryptionPanel extends JPanel implements DropTargetListener {
     private Key loadedKey = null;
     private File selectedInputFile = null;
 
+    private String currentAlgorithmType = "Symmetric";
+
     public FileEncryptionPanel() {
         setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
@@ -115,8 +117,8 @@ public class FileEncryptionPanel extends JPanel implements DropTargetListener {
         new DropTarget(this, DnDConstants.ACTION_COPY_OR_MOVE, this, true);
         new DropTarget(dragDropLabel, DnDConstants.ACTION_COPY_OR_MOVE, this, true);
 
+        setAlgorithmType(currentAlgorithmType);
         setupActionListeners();
-        updateModesAndPaddings();
     }
 
     private JPanel createDropPanel() {
@@ -764,5 +766,35 @@ public class FileEncryptionPanel extends JPanel implements DropTargetListener {
         String upper = algorithm.toUpperCase();
         return upper.equals("CAESAR") || upper.equals("VIGENERE")
                 || upper.equals("MONOALPHABETIC") || upper.equals("AFFINE") || upper.equals("HILL");
+    }
+
+    public void setAlgorithmType(String type) {
+        this.currentAlgorithmType = type;
+        DefaultComboBoxModel<String> model = new DefaultComboBoxModel<>();
+        switch (type) {
+            case "Symmetric":
+                model.addElement("AES");
+                model.addElement("DES");
+                model.addElement("DESede");
+                model.addElement("Blowfish");
+                model.addElement("ChaCha20-Poly1305");
+                model.addElement("Twofish");
+                model.addElement("Camellia");
+                model.addElement("CAST5");
+                model.addElement("RC5");
+                break;
+            case "Asymmetric":
+                model.addElement("RSA");
+                break;
+            case "Traditional":
+                model.addElement("Caesar");
+                model.addElement("Vigenere");
+                model.addElement("Monoalphabetic");
+                model.addElement("Affine");
+                model.addElement("Hill");
+                break;
+        }
+        algorithmComboBox.setModel(model);
+        updateModesAndPaddings();
     }
 }

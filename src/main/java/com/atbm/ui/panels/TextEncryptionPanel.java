@@ -33,6 +33,8 @@ public class TextEncryptionPanel extends JPanel {
     private Key loadedKey = null;
     private String loadedTraditionalKey = null;
 
+    private String currentAlgorithmType = "Symmetric";
+
     public TextEncryptionPanel() {
         setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
@@ -93,6 +95,7 @@ public class TextEncryptionPanel extends JPanel {
 
         setupActionListeners();
         updateModesAndPaddings(); // Initial population
+        setAlgorithmType(currentAlgorithmType);
     }
 
     private JPanel createKeyInputPanel() {
@@ -524,5 +527,36 @@ public class TextEncryptionPanel extends JPanel {
         String upper = algorithm.toUpperCase();
         return upper.equals("CAESAR") || upper.equals("VIGENERE")
                 || upper.equals("MONOALPHABETIC") || upper.equals("AFFINE") || upper.equals("HILL");
+    }
+
+    // Thêm hàm setAlgorithmType(String type)
+    public void setAlgorithmType(String type) {
+        this.currentAlgorithmType = type;
+        DefaultComboBoxModel<String> model = new DefaultComboBoxModel<>();
+        switch (type) {
+            case "Symmetric":
+                model.addElement("AES");
+                model.addElement("DES");
+                model.addElement("DESede");
+                model.addElement("Blowfish");
+                model.addElement("ChaCha20-Poly1305");
+                model.addElement("Twofish");
+                model.addElement("Camellia");
+                model.addElement("CAST5");
+                model.addElement("RC5");
+                break;
+            case "Asymmetric":
+                model.addElement("RSA");
+                break;
+            case "Traditional":
+                model.addElement("Caesar");
+                model.addElement("Vigenere");
+                model.addElement("Monoalphabetic");
+                model.addElement("Affine");
+                model.addElement("Hill");
+                break;
+        }
+        algorithmComboBox.setModel(model);
+        updateModesAndPaddings();
     }
 }
