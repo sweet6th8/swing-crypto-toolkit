@@ -11,11 +11,16 @@ public class KeyUtils {
 
     public static String generateSymmetricKey(String algorithm, int keySize) {
         try {
-            KeyGenerator keyGen = KeyGenerator.getInstance(algorithm);
+            KeyGenerator keyGen;
+            if (algorithm.equalsIgnoreCase("Twofish")) {
+                keyGen = KeyGenerator.getInstance(algorithm, "BC");
+            } else {
+                keyGen = KeyGenerator.getInstance(algorithm);
+            }
             keyGen.init(keySize);
             SecretKey secretKey = keyGen.generateKey();
             return Base64.getEncoder().encodeToString(secretKey.getEncoded());
-        } catch (NoSuchAlgorithmException e) {
+        } catch (NoSuchAlgorithmException | NoSuchProviderException e) {
             e.printStackTrace();
             return "Lỗi: Thuật toán không hỗ trợ!";
         } catch (Exception e) {

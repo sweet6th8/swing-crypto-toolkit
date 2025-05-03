@@ -107,7 +107,8 @@ public class KeyManager {
         String upperAlgo = algorithm.toUpperCase();
 
         if (upperAlgo.equals("AES") || upperAlgo.equals("DES") || upperAlgo.equals("DESEDE")
-                || upperAlgo.equals("CHACHA20-POLY1305") || upperAlgo.equals("BLOWFISH")) {
+                || upperAlgo.equals("CHACHA20-POLY1305") || upperAlgo.equals("BLOWFISH")
+                || upperAlgo.equals("TWOFISH")) {
             // Symmetric: Load SecretKey
             if (!lowerPath.endsWith(".key")) {
                 throw new IllegalArgumentException("Expected a .key file for symmetric algorithm " + algorithm);
@@ -134,5 +135,11 @@ public class KeyManager {
         } else {
             throw new NoSuchAlgorithmException("Unsupported algorithm for key loading: " + algorithm);
         }
+    }
+
+    public static SecretKey generateTwofishKey(int keySize) throws Exception {
+        javax.crypto.KeyGenerator keyGen = javax.crypto.KeyGenerator.getInstance("Twofish", "BC");
+        keyGen.init(keySize);
+        return keyGen.generateKey();
     }
 }
