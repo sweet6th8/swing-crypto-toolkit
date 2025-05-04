@@ -1,25 +1,23 @@
 package com.atbm.ui.panels;
 
 import com.atbm.core.hash.HashAlgorithm;
-
 import javax.swing.*;
-import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.dnd.*;
 import java.io.File;
 import java.util.List;
 
+// Class hash text và file
 public class HashPanel extends JPanel implements DropTargetListener {
-    // Tab components
     private JTabbedPane tabbedPane;
-    // --- Hash text ---
+    // Hash text
     private JTextArea inputTextArea;
     private JComboBox<String> algoTextComboBox;
     private JButton hashTextButton;
     private JTextArea resultTextArea;
     private JButton copyTextButton;
-    // --- Hash file ---
+    // Hash file
     private JPanel fileDropPanel;
     private JLabel fileDropLabel;
     private File selectedFile;
@@ -163,7 +161,7 @@ public class HashPanel extends JPanel implements DropTargetListener {
         return panel;
     }
 
-    // --- Hash logic ---
+    // Hash logic
     private void hashText() {
         String text = inputTextArea.getText();
         String algo = (String) algoTextComboBox.getSelectedItem();
@@ -181,23 +179,7 @@ public class HashPanel extends JPanel implements DropTargetListener {
         }
     }
 
-    private void hashFile() {
-        if (selectedFile == null) {
-            JOptionPane.showMessageDialog(this, "Vui lòng kéo thả hoặc chọn file để hash.", "Lỗi",
-                    JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        String algo = (String) algoFileComboBox.getSelectedItem();
-        try {
-            String hash = HashAlgorithm.hashFile(selectedFile, algo);
-            resultFileArea.setText(hash);
-        } catch (Exception ex) {
-            resultFileArea.setText("");
-            JOptionPane.showMessageDialog(this, "Lỗi khi hash file: " + ex.getMessage(), "Lỗi",
-                    JOptionPane.ERROR_MESSAGE);
-        }
-    }
-
+    // để copy kết quả hash
     private void copyToClipboard(JTextArea area) {
         String hash = area.getText();
         if (hash != null && !hash.isEmpty()) {
@@ -208,7 +190,6 @@ public class HashPanel extends JPanel implements DropTargetListener {
         }
     }
 
-    // --- DropTargetListener for file tab ---
     @Override
     public void dragEnter(DropTargetDragEvent dtde) {
         fileDropPanel.setBorder(BorderFactory.createLineBorder(Color.BLUE, 2));
@@ -227,6 +208,7 @@ public class HashPanel extends JPanel implements DropTargetListener {
         fileDropPanel.setBorder(BorderFactory.createDashedBorder(Color.GRAY, 3, 6));
     }
 
+    // kéo thả file
     @Override
     public void drop(DropTargetDropEvent dtde) {
         try {
@@ -246,7 +228,7 @@ public class HashPanel extends JPanel implements DropTargetListener {
         fileDropPanel.setBorder(BorderFactory.createDashedBorder(Color.GRAY, 3, 6));
     }
 
-    // Hash file with progress bar
+    // Hash file với progress bar
     private void hashFileWithProgress() {
         if (selectedFile == null) {
             JOptionPane.showMessageDialog(this, "Vui lòng kéo thả hoặc chọn file để hash.", "Lỗi",
