@@ -3,36 +3,25 @@ package com.atbm.ui.panels;
 import com.atbm.utils.FileUtils;
 
 import javax.swing.*;
-import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.awt.dnd.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.awt.datatransfer.DataFlavor;
 import java.security.Key;
-import com.atbm.core.encryption.EncryptionAlgorithm;
-import com.atbm.core.encryption.EncryptionAlgorithmFactory;
 import com.atbm.core.key.KeyManager;
-import com.atbm.core.encryption.symmetric.AESEncryption;
-import com.atbm.core.encryption.symmetric.DESedeEncryption;
-import com.atbm.core.encryption.symmetric.ChaCha20Poly1305Encryption;
-import com.atbm.core.encryption.asymmetric.RSAEncryption;
-import com.atbm.core.encryption.traditional.CaesarCipher;
-import com.atbm.core.encryption.traditional.VigenereCipher;
 import java.security.SecureRandom;
 import javax.crypto.spec.IvParameterSpec;
 import java.io.FileInputStream;
 import javax.swing.SwingWorker;
 import javax.swing.SwingUtilities;
 import java.util.function.Consumer;
-import java.io.FileOutputStream;
 import java.security.PublicKey;
 import java.security.PrivateKey;
 import com.atbm.core.encryption.asymmetric.RSAHybridEncryption;
 
+// Class mã hóa/giải mã file
 public class FileEncryptionPanel extends JPanel implements DropTargetListener {
 
     private JTextField inputFilePathField;
@@ -50,7 +39,6 @@ public class FileEncryptionPanel extends JPanel implements DropTargetListener {
     private JLabel dragDropLabel;
     private JProgressBar progressBar;
 
-    // Placeholder for loaded key and selected file
     private Key loadedKey = null;
     private File selectedInputFile = null;
 
@@ -65,7 +53,7 @@ public class FileEncryptionPanel extends JPanel implements DropTargetListener {
 
         fileChooser = new JFileChooser();
 
-        // --- Drag and Drop Area ---
+        // Drop panel
         gbc.gridx = 0;
         gbc.gridy = 0;
         gbc.gridwidth = 4;
@@ -75,21 +63,21 @@ public class FileEncryptionPanel extends JPanel implements DropTargetListener {
         JPanel dropPanel = createDropPanel();
         add(dropPanel, gbc);
 
-        // --- Key Input ---
+        // Key input
         gbc.gridy++;
         gbc.weighty = 0;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         add(createKeyInputPanel(), gbc);
 
-        // --- Algorithm Selection ---
+        // Chọn thuật toán
         gbc.gridy++;
         add(createAlgorithmSelectionPanel(), gbc);
 
-        // --- Output Selection ---
+        // Xuất kết quả
         gbc.gridy++;
         add(createOutputPanel(), gbc);
 
-        // --- Progress Bar ---
+        // Progress bar
         gbc.gridy++;
         gbc.gridwidth = 4;
         gbc.fill = GridBagConstraints.HORIZONTAL;
@@ -98,7 +86,7 @@ public class FileEncryptionPanel extends JPanel implements DropTargetListener {
         progressBar.setVisible(false);
         add(progressBar, gbc);
 
-        // --- Action Buttons ---
+        // Button mã hóa/giải mã
         gbc.gridy++;
         gbc.gridwidth = 1;
         gbc.fill = GridBagConstraints.NONE;
@@ -113,7 +101,7 @@ public class FileEncryptionPanel extends JPanel implements DropTargetListener {
         decryptButton = new JButton("Giải mã!");
         add(decryptButton, gbc);
 
-        // Make panel a drop target
+        // Kéo thả file
         new DropTarget(this, DnDConstants.ACTION_COPY_OR_MOVE, this, true);
         new DropTarget(dragDropLabel, DnDConstants.ACTION_COPY_OR_MOVE, this, true);
 
@@ -121,6 +109,7 @@ public class FileEncryptionPanel extends JPanel implements DropTargetListener {
         setupActionListeners();
     }
 
+    // Drop panel
     private JPanel createDropPanel() {
         JPanel panel = new JPanel(new BorderLayout(10, 10));
         panel.setBorder(BorderFactory.createTitledBorder("Chọn File Đầu Vào"));
@@ -144,6 +133,7 @@ public class FileEncryptionPanel extends JPanel implements DropTargetListener {
         return panel;
     }
 
+    // Key input
     private JPanel createKeyInputPanel() {
         JPanel panel = new JPanel(new GridBagLayout());
         panel.setBorder(BorderFactory.createTitledBorder("Nhập File Key"));
@@ -165,8 +155,9 @@ public class FileEncryptionPanel extends JPanel implements DropTargetListener {
         return panel;
     }
 
+    // Chọn thuật toán
     private JPanel createAlgorithmSelectionPanel() {
-        JPanel panel = new JPanel(new GridLayout(1, 3, 10, 0)); // Use GridLayout for equal spacing
+        JPanel panel = new JPanel(new GridLayout(1, 3, 10, 0));
         panel.setBorder(BorderFactory.createTitledBorder("Lựa chọn thuật toán"));
 
         // Algorithm
@@ -209,6 +200,7 @@ public class FileEncryptionPanel extends JPanel implements DropTargetListener {
         return panel;
     }
 
+    // Xuất kết quả
     private JPanel createOutputPanel() {
         JPanel panel = new JPanel(new GridBagLayout());
         panel.setBorder(BorderFactory.createTitledBorder("Xuất kết quả"));
@@ -230,6 +222,7 @@ public class FileEncryptionPanel extends JPanel implements DropTargetListener {
         return panel;
     }
 
+    // Action listeners
     private void setupActionListeners() {
         browseInputButton.addActionListener(e -> browseInputFile());
         loadKeyButton.addActionListener(e -> loadKeyFile());
@@ -241,6 +234,7 @@ public class FileEncryptionPanel extends JPanel implements DropTargetListener {
         decryptButton.addActionListener(e -> performEncryptionDecryption(false));
     }
 
+    // Chọn file đầu vào
     private void browseInputFile() {
         fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
         int returnValue = fileChooser.showOpenDialog(this);
@@ -249,20 +243,17 @@ public class FileEncryptionPanel extends JPanel implements DropTargetListener {
         }
     }
 
+    // Xử lý file
     private void handleSelectedFile(File file) {
         selectedInputFile = file;
         inputFilePathField.setText(file.getAbsolutePath());
 
-        // Suggest output filename based on input
         String inputName = file.getName();
         String outputName;
 
-        // Check if file is already encrypted (ends with _encrypted)
         if (inputName.toLowerCase().endsWith("_encrypted")) {
-            // For decryption, replace _encrypted with _decrypted
             outputName = inputName.replace("_encrypted", "_decrypted");
         } else {
-            // For encryption, add _encrypted before the extension
             if (inputName.contains(".")) {
                 int lastDot = inputName.lastIndexOf(".");
                 outputName = inputName.substring(0, lastDot) + "_encrypted" + inputName.substring(lastDot);
@@ -285,13 +276,7 @@ public class FileEncryptionPanel extends JPanel implements DropTargetListener {
             return;
         }
 
-        // Determine if loading for encryption or decryption (needed for asymmetric)
-        // For simplicity, assume loading a key is always for *potential* use in both.
-        // We will rely on the file extension (.pub/.pri) for asymmetric.
-        // A better approach might involve separate load buttons or context.
-
         fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-        // Suggest key directory
         File keyDir = new File("./keys");
         if (keyDir.isDirectory()) {
             fileChooser.setCurrentDirectory(keyDir);
@@ -302,39 +287,29 @@ public class FileEncryptionPanel extends JPanel implements DropTargetListener {
             File keyFile = fileChooser.getSelectedFile();
             String keyFilePath = keyFile.getAbsolutePath();
             keyFilePathField.setText(keyFilePath);
-            loadedKey = null; // Reset previous key
+            loadedKey = null;
 
             try {
-                // Determine if we are likely encrypting or decrypting based on filename? Risky.
-                // Let's determine based on expected file types for the algorithm.
-                boolean forEncryption = true; // Default assumption, refined below
+                boolean forEncryption = true;
                 String lowerPath = keyFilePath.toLowerCase();
                 String upperAlgo = selectedAlgorithm.toUpperCase();
 
                 if (upperAlgo.equals("RSA")) {
                     if (lowerPath.endsWith(".pri")) {
-                        // If loading private key, likely for decryption
                         forEncryption = false;
                     } else if (lowerPath.endsWith(".pub")) {
-                        // If loading public key, likely for encryption
                         forEncryption = true;
                     } else {
                         throw new IllegalArgumentException(
                                 "Tệp khóa RSA phải có đuôi .pub (mã hóa) hoặc .pri (giải mã).");
                     }
-                } else if (upperAlgo.equals("AES")) { // Add other symmetric algos here
+                } else if (upperAlgo.equals("AES") || upperAlgo.equals("DESEDE")
+                        || upperAlgo.equals("CHACHA20-POLY1305")) {
                     if (!lowerPath.endsWith(".key")) {
                         throw new IllegalArgumentException("Tệp khóa " + upperAlgo + " phải có đuôi .key.");
                     }
-                    // Doesn't matter for symmetric
-                } else if (upperAlgo.equals("CAESAR") || upperAlgo.equals("VIGENERE")) {
-                    // Key file might not be applicable or have custom format
-                    JOptionPane.showMessageDialog(this, "Load khóa từ file không áp dụng cho " + selectedAlgorithm,
-                            "Thông báo", JOptionPane.INFORMATION_MESSAGE);
-                    return; // Or load shift/keyword from file if implemented
                 }
 
-                // Kiểm tra tên file key phải chứa tên thuật toán đang chọn
                 if (!lowerPath.contains(selectedAlgorithm.toLowerCase())) {
                     loadedKey = null;
                     keyFilePathField.setText("");
@@ -345,14 +320,10 @@ public class FileEncryptionPanel extends JPanel implements DropTargetListener {
                     return;
                 }
 
-                // Use the refined KeyManager method
                 loadedKey = KeyManager.loadKeyForOperation(keyFilePath, selectedAlgorithm, forEncryption);
 
                 if (loadedKey != null) {
                     String keyAlgorithm = loadedKey.getAlgorithm();
-                    // Debug log để kiểm tra giá trị thực tế
-                    System.out.println(
-                            "DEBUG: selectedAlgorithm = " + selectedAlgorithm + ", keyAlgorithm = " + keyAlgorithm);
                     if (!keyAlgorithm.equalsIgnoreCase(selectedAlgorithm)) {
                         loadedKey = null;
                         keyFilePathField.setText("");
@@ -372,7 +343,7 @@ public class FileEncryptionPanel extends JPanel implements DropTargetListener {
 
             } catch (Exception ex) {
                 loadedKey = null;
-                keyFilePathField.setText(""); // Clear field on error
+                keyFilePathField.setText("");
                 JOptionPane.showMessageDialog(this, "Lỗi khi load khóa: " + ex.getMessage(), "Lỗi",
                         JOptionPane.ERROR_MESSAGE);
                 ex.printStackTrace();
@@ -380,9 +351,9 @@ public class FileEncryptionPanel extends JPanel implements DropTargetListener {
         }
     }
 
+    // Xuất kết quả
     private void browseOutputFile() {
         fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-        // Set suggested name if input file is selected
         if (selectedInputFile != null) {
             String outputName = outputFilePathField.getText();
             if (!outputName.isEmpty()) {
@@ -401,37 +372,34 @@ public class FileEncryptionPanel extends JPanel implements DropTargetListener {
         }
     }
 
+    // Cập nhật mode và padding
     private void updateModesAndPaddings() {
         String selectedAlgorithm = (String) algorithmComboBox.getSelectedItem();
         DefaultComboBoxModel<String> modeModel = new DefaultComboBoxModel<>();
 
         if (selectedAlgorithm != null && selectedAlgorithm.equals("Twofish")) {
-            // Twofish: chỉ cho phép ECB và CBC
             modeModel.addElement("ECB");
             modeModel.addElement("CBC");
         } else if (selectedAlgorithm != null && !selectedAlgorithm.equals("ChaCha20-Poly1305")
-                && !selectedAlgorithm.equals("RSA") && !isTraditionalAlgorithm(selectedAlgorithm)) {
-            // Các thuật toán đối xứng khác
+                && !selectedAlgorithm.equals("RSA")) {
             modeModel.addElement("ECB");
             modeModel.addElement("CBC");
         } else if (selectedAlgorithm != null && selectedAlgorithm.equals("ChaCha20-Poly1305")) {
             modeModel.addElement("N/A");
         } else if (selectedAlgorithm != null && selectedAlgorithm.equals("RSA")) {
             modeModel.addElement("N/A");
-        } else if (selectedAlgorithm != null && isTraditionalAlgorithm(selectedAlgorithm)) {
-            modeModel.addElement("N/A");
         }
 
         modeComboBox.setModel(modeModel);
         updatePaddingForMode();
         boolean enableSelection = selectedAlgorithm != null && !selectedAlgorithm.equals("ChaCha20-Poly1305") &&
-                !selectedAlgorithm.equals("RSA") &&
-                !isTraditionalAlgorithm(selectedAlgorithm);
+                !selectedAlgorithm.equals("RSA");
         modeComboBox.setEnabled(enableSelection);
         paddingComboBox.setEnabled(enableSelection);
         modeComboBox.addActionListener(e -> updatePaddingForMode());
     }
 
+    // Cập nhật padding cho mode
     private void updatePaddingForMode() {
         String selectedAlgorithm = (String) algorithmComboBox.getSelectedItem();
         String selectedMode = (String) modeComboBox.getSelectedItem();
@@ -453,20 +421,18 @@ public class FileEncryptionPanel extends JPanel implements DropTargetListener {
                     break;
             }
         } else if (selectedAlgorithm != null && !selectedAlgorithm.equals("ChaCha20-Poly1305")
-                && !selectedAlgorithm.equals("RSA") && !isTraditionalAlgorithm(selectedAlgorithm)) {
-            // Các thuật toán đối xứng khác
+                && !selectedAlgorithm.equals("RSA")) {
             paddingModel.addElement("PKCS5Padding");
             paddingModel.addElement("NoPadding");
         } else if (selectedAlgorithm != null && selectedAlgorithm.equals("ChaCha20-Poly1305")) {
             paddingModel.addElement("N/A");
         } else if (selectedAlgorithm != null && selectedAlgorithm.equals("RSA")) {
             paddingModel.addElement("N/A");
-        } else if (selectedAlgorithm != null && isTraditionalAlgorithm(selectedAlgorithm)) {
-            paddingModel.addElement("N/A");
         }
         paddingComboBox.setModel(paddingModel);
     }
 
+    // Thực hiện mã hóa/giải mã
     private void performEncryptionDecryption(boolean encrypt) {
         String operation = encrypt ? "Mã hóa" : "Giải mã";
         String algorithm = (String) algorithmComboBox.getSelectedItem();
@@ -474,20 +440,15 @@ public class FileEncryptionPanel extends JPanel implements DropTargetListener {
         String padding = (String) paddingComboBox.getSelectedItem();
         String outputFilePath = outputFilePathField.getText().trim();
 
-        // --- Input Validation ---
         if (selectedInputFile == null || !selectedInputFile.exists()) {
             JOptionPane.showMessageDialog(this, "Vui lòng chọn file đầu vào hợp lệ.", "Lỗi " + operation,
                     JOptionPane.ERROR_MESSAGE);
             return;
         }
         if (loadedKey == null) {
-            if (algorithm != null && (algorithm.equalsIgnoreCase("Caesar") || algorithm.equalsIgnoreCase("Vigenere"))) {
-                // Allow proceeding for traditional ciphers
-            } else {
-                JOptionPane.showMessageDialog(this, "Vui lòng load file key.", "Lỗi " + operation,
-                        JOptionPane.ERROR_MESSAGE);
-                return;
-            }
+            JOptionPane.showMessageDialog(this, "Vui lòng load file key.", "Lỗi " + operation,
+                    JOptionPane.ERROR_MESSAGE);
+            return;
         }
         if (outputFilePath.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Vui lòng chọn đường dẫn file đầu ra.", "Lỗi " + operation,
@@ -503,18 +464,16 @@ public class FileEncryptionPanel extends JPanel implements DropTargetListener {
             return;
         }
 
-        // Disable buttons and show progress bar
         encryptButton.setEnabled(false);
         decryptButton.setEnabled(false);
         progressBar.setVisible(true);
         progressBar.setValue(0);
 
-        // Run encryption/decryption in background thread
+        // Chạy mã hóa/giải mã trong background thread
         SwingWorker<Void, Integer> worker = new SwingWorker<Void, Integer>() {
             @Override
             protected Void doInBackground() throws Exception {
                 try {
-                    // --- Determine actual key size from loaded key ---
                     int actualKeySize = 0;
                     if (loadedKey instanceof java.security.interfaces.RSAKey) {
                         actualKeySize = ((java.security.interfaces.RSAKey) loadedKey).getModulus().bitLength();
@@ -543,13 +502,11 @@ public class FileEncryptionPanel extends JPanel implements DropTargetListener {
 
                     long startTime = System.currentTimeMillis();
 
-                    // Special handling for RSA with large files
                     if (algorithm.equals("RSA")) {
                         if (encrypt) {
                             RSAHybridEncryption.encryptFile(selectedInputFile, new File(outputFilePath),
                                     (PublicKey) loadedKey);
                         } else {
-                            // Kiểm tra đúng loại khóa trước khi giải mã
                             if (!(loadedKey instanceof PrivateKey)) {
                                 SwingUtilities.invokeLater(() -> {
                                     JOptionPane.showMessageDialog(FileEncryptionPanel.this,
@@ -562,11 +519,7 @@ public class FileEncryptionPanel extends JPanel implements DropTargetListener {
                             RSAHybridEncryption.decryptFile(selectedInputFile, new File(outputFilePath),
                                     (PrivateKey) loadedKey);
                         }
-                    } else if (algorithm.equals("Caesar") || algorithm.equals("Vigenere")) {
-                        // Traditional cipher handling remains the same
-                        // ... existing traditional cipher code ...
                     } else {
-                        // Handle symmetric encryption with streaming
                         String transformation;
                         boolean isChaCha = algorithm.equals("ChaCha20-Poly1305");
                         if (isChaCha) {
@@ -632,7 +585,6 @@ public class FileEncryptionPanel extends JPanel implements DropTargetListener {
                     long endTime = System.currentTimeMillis();
                     long duration = endTime - startTime;
 
-                    // Get file sizes for the message
                     long inputSize = selectedInputFile.length();
                     long outputSize = new File(outputFilePath).length();
 
@@ -687,11 +639,8 @@ public class FileEncryptionPanel extends JPanel implements DropTargetListener {
         worker.execute();
     }
 
-    // --- DropTargetListener Implementation ---
-
     @Override
     public void dragEnter(DropTargetDragEvent dtde) {
-        // Change border or background on drag enter
         dragDropLabel.setBorder(BorderFactory.createLineBorder(Color.BLUE, 2));
     }
 
@@ -705,7 +654,6 @@ public class FileEncryptionPanel extends JPanel implements DropTargetListener {
 
     @Override
     public void dragExit(DropTargetEvent dte) {
-        // Restore border on drag exit
         if (selectedInputFile == null) {
             dragDropLabel.setBorder(BorderFactory.createDashedBorder(Color.GRAY, 5, 5));
         } else {
@@ -721,9 +669,8 @@ public class FileEncryptionPanel extends JPanel implements DropTargetListener {
             List<File> droppedFiles = (List<File>) dtde.getTransferable()
                     .getTransferData(DataFlavor.javaFileListFlavor);
             if (droppedFiles != null && !droppedFiles.isEmpty()) {
-                // Handle only the first file
                 File droppedFile = droppedFiles.get(0);
-                if (!droppedFile.isDirectory()) { // Ensure it's a file
+                if (!droppedFile.isDirectory()) {
                     handleSelectedFile(droppedFile);
                     success = true;
                 } else {
@@ -738,11 +685,10 @@ public class FileEncryptionPanel extends JPanel implements DropTargetListener {
         }
 
         dtde.dropComplete(success);
-        // Restore border after drop
         dragExit(null);
     }
 
-    // Main method for testing this panel independently
+    // test
     public static void main(String[] args) {
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -753,19 +699,10 @@ public class FileEncryptionPanel extends JPanel implements DropTargetListener {
         JFrame frame = new JFrame("FileEncryptionPanel Test");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.getContentPane().add(new FileEncryptionPanel());
-        frame.pack(); // Adjust frame size to panel content
-        frame.setSize(600, 600); // Or set a specific size
+        frame.pack();
+        frame.setSize(600, 600);
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
-    }
-
-    // Thêm hàm tiện ích xác định thuật toán truyền thống
-    private boolean isTraditionalAlgorithm(String algorithm) {
-        if (algorithm == null)
-            return false;
-        String upper = algorithm.toUpperCase();
-        return upper.equals("CAESAR") || upper.equals("VIGENERE")
-                || upper.equals("MONOALPHABETIC") || upper.equals("AFFINE") || upper.equals("HILL");
     }
 
     public void setAlgorithmType(String type) {
@@ -787,11 +724,7 @@ public class FileEncryptionPanel extends JPanel implements DropTargetListener {
                 model.addElement("RSA");
                 break;
             case "Traditional":
-                model.addElement("Caesar");
-                model.addElement("Vigenere");
-                model.addElement("Monoalphabetic");
-                model.addElement("Affine");
-                model.addElement("Hill");
+                // Không thêm thuật toán truyền thống
                 break;
         }
         algorithmComboBox.setModel(model);
