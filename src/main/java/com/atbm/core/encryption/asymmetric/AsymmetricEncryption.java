@@ -6,6 +6,7 @@ import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import com.atbm.core.encryption.EncryptionAlgorithm;
 
+// Đây là class cha cho các thuật toán mã hóa bất đối xứng, gồm các phương thức chung 
 public abstract class AsymmetricEncryption implements EncryptionAlgorithm {
     protected String algorithm;
     protected int keySize;

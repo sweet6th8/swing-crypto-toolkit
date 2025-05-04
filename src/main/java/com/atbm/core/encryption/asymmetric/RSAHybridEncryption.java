@@ -20,31 +20,22 @@ public class RSAHybridEncryption {
     private static final String AES_TRANSFORMATION = "AES/CBC/PKCS5Padding";
     private static final int AES_KEY_SIZE = 256;
     private static final String RSA_TRANSFORMATION = "RSA/ECB/PKCS1Padding";
-    private static final int BUFFER_SIZE = 8192; // 8KB buffer size
+    private static final int BUFFER_SIZE = 8192; // 8KB
 
-    // Magic number để xác định đây là file hybrid
+    // Magic number để xác định có phải file hybrid
     private static final byte[] MAGIC_NUMBER = "HYBRID".getBytes();
     private static final int MAGIC_NUMBER_LENGTH = MAGIC_NUMBER.length;
 
-    /**
-     * Mã hóa dữ liệu sử dụng RSA hybrid encryption
-     * 
-     * @param data      Dữ liệu cần mã hóa
-     * @param publicKey Khóa công khai RSA
-     * @return Dữ liệu đã mã hóa theo định dạng: [MAGIC_NUMBER][IV length (4
-     *         bytes)][IV][encrypted
-     *         AES key length (4 bytes)][encrypted AES key][encrypted data]
-     * @throws GeneralSecurityException Nếu có lỗi trong quá trình mã hóa
-     */
+    // Mã hóa dữ liệu sử dụng RSA hybrid
     public static byte[] encrypt(byte[] data, PublicKey publicKey) throws GeneralSecurityException {
         if (data == null) {
-            throw new IllegalArgumentException("Data cannot be null");
+            throw new IllegalArgumentException("Dữ liệu không được null");
         }
         if (publicKey == null) {
-            throw new IllegalArgumentException("Public key cannot be null");
+            throw new IllegalArgumentException("Khóa công khai không được null");
         }
         if (data.length == 0) {
-            throw new IllegalArgumentException("Data cannot be empty");
+            throw new IllegalArgumentException("Dữ liệu không được rỗng");
         }
 
         try {
@@ -80,36 +71,29 @@ public class RSAHybridEncryption {
                 // Ghi dữ liệu đã mã hóa
                 outputStream.write(encryptedData);
             } catch (IOException e) {
-                throw new GeneralSecurityException("Error writing encrypted data: " + e.getMessage(), e);
+                throw new GeneralSecurityException("Lỗi khi ghi dữ liệu đã mã hóa: " + e.getMessage(), e);
             }
 
             return outputStream.toByteArray();
         } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
-            throw new GeneralSecurityException("Error initializing encryption algorithm: " + e.getMessage(), e);
+            throw new GeneralSecurityException("Lỗi khi khởi tạo: " + e.getMessage(), e);
         } catch (InvalidKeyException e) {
-            throw new GeneralSecurityException("Invalid key: " + e.getMessage(), e);
+            throw new GeneralSecurityException("Khóa không hợp lệ: " + e.getMessage(), e);
         } catch (IllegalBlockSizeException | BadPaddingException e) {
-            throw new GeneralSecurityException("Error during encryption: " + e.getMessage(), e);
+            throw new GeneralSecurityException("Lỗi trong quá trình mã hóa: " + e.getMessage(), e);
         }
     }
 
-    /**
-     * Giải mã dữ liệu đã được mã hóa bằng RSA hybrid encryption
-     * 
-     * @param encryptedData Dữ liệu đã mã hóa
-     * @param privateKey    Khóa bí mật RSA
-     * @return Dữ liệu đã giải mã
-     * @throws GeneralSecurityException Nếu có lỗi trong quá trình giải mã
-     */
+    // Giải mã dữ liệu sử dụng RSA hybrid
     public static byte[] decrypt(byte[] encryptedData, PrivateKey privateKey) throws GeneralSecurityException {
         if (encryptedData == null) {
-            throw new IllegalArgumentException("Encrypted data cannot be null");
+            throw new IllegalArgumentException("Dữ liệu không được null");
         }
         if (privateKey == null) {
-            throw new IllegalArgumentException("Private key cannot be null");
+            throw new IllegalArgumentException("Private key không được null");
         }
-        if (encryptedData.length < MAGIC_NUMBER_LENGTH + 8) { // Minimum size: magic + IV length + AES key length
-            throw new IllegalArgumentException("Encrypted data is too short");
+        if (encryptedData.length < MAGIC_NUMBER_LENGTH + 8) {
+            throw new IllegalArgumentException("Dữ liệu đã mã hóa quá ngắn");
         }
 
         try {
@@ -118,37 +102,37 @@ public class RSAHybridEncryption {
             // 1. Kiểm tra magic number
             byte[] magic = new byte[MAGIC_NUMBER_LENGTH];
             if (readBytes(inputStream, magic) != MAGIC_NUMBER_LENGTH || !isValidMagicNumber(magic)) {
-                throw new GeneralSecurityException("Invalid data format: not a hybrid encrypted file");
+                throw new GeneralSecurityException("Định dạng dữ liệu không hợp lệ: không phải file đã mã hóa hybrid");
             }
 
             // 2. Đọc IV length và IV
             byte[] ivLengthBytes = new byte[4];
             if (readBytes(inputStream, ivLengthBytes) != 4) {
-                throw new GeneralSecurityException("Invalid data format: cannot read IV length");
+                throw new GeneralSecurityException("Không thể đọc độ dài IV");
             }
             int ivLength = bytesToInt(ivLengthBytes);
-            if (ivLength <= 0 || ivLength > 16) { // AES IV is always 16 bytes
-                throw new GeneralSecurityException("Invalid IV length: " + ivLength);
+            if (ivLength <= 0 || ivLength > 16) {
+                throw new GeneralSecurityException("Độ dài IV không hợp lệ: " + ivLength);
             }
 
             byte[] iv = new byte[ivLength];
             if (readBytes(inputStream, iv) != ivLength) {
-                throw new GeneralSecurityException("Invalid data format: cannot read IV");
+                throw new GeneralSecurityException("không thể đọc IV");
             }
 
             // 3. Đọc độ dài và dữ liệu khóa AES đã mã hóa
             byte[] aesKeyLengthBytes = new byte[4];
             if (readBytes(inputStream, aesKeyLengthBytes) != 4) {
-                throw new GeneralSecurityException("Invalid data format: cannot read AES key length");
+                throw new GeneralSecurityException("Không thể đọc độ dài khóa AES");
             }
             int aesKeyLength = bytesToInt(aesKeyLengthBytes);
-            if (aesKeyLength <= 0 || aesKeyLength > 512) { // Reasonable limit for RSA encrypted AES key
-                throw new GeneralSecurityException("Invalid AES key length: " + aesKeyLength);
+            if (aesKeyLength <= 0 || aesKeyLength > 512) {
+                throw new GeneralSecurityException("Độ dài khóa AES không hợp lệ: " + aesKeyLength);
             }
 
             byte[] encryptedAesKey = new byte[aesKeyLength];
             if (readBytes(inputStream, encryptedAesKey) != aesKeyLength) {
-                throw new GeneralSecurityException("Invalid data format: cannot read AES key");
+                throw new GeneralSecurityException("Không thể đọc khóa AES");
             }
 
             // 4. Giải mã khóa AES bằng RSA
@@ -165,39 +149,31 @@ public class RSAHybridEncryption {
 
             byte[] remainingData = inputStream.readAllBytes();
             if (remainingData.length == 0) {
-                throw new GeneralSecurityException("No encrypted data found");
+                throw new GeneralSecurityException("Không tìm thấy dữ liệu đã mã hóa");
             }
             return aesCipher.doFinal(remainingData);
         } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
-            throw new GeneralSecurityException("Error initializing decryption algorithm: " + e.getMessage(), e);
+            throw new GeneralSecurityException("Lỗi khi khởi tạo thuật toán giải mã: " + e.getMessage(), e);
         } catch (InvalidKeyException e) {
-            throw new GeneralSecurityException("Invalid key: " + e.getMessage(), e);
+            throw new GeneralSecurityException("Khóa không hợp lệ: " + e.getMessage(), e);
         } catch (IllegalBlockSizeException | BadPaddingException e) {
-            throw new GeneralSecurityException("Error during decryption: " + e.getMessage(), e);
+            throw new GeneralSecurityException("Lỗi trong quá trình giải mã: " + e.getMessage(), e);
         } catch (IOException e) {
-            throw new GeneralSecurityException("Error reading encrypted data: " + e.getMessage(), e);
+            throw new GeneralSecurityException("Lỗi khi đọc dữ liệu đã mã hóa: " + e.getMessage(), e);
         }
     }
 
-    /**
-     * Mã hóa file sử dụng RSA hybrid encryption với streaming
-     * 
-     * @param inputFile  File cần mã hóa
-     * @param outputFile File kết quả
-     * @param publicKey  Khóa công khai RSA
-     * @throws GeneralSecurityException Nếu có lỗi trong quá trình mã hóa
-     * @throws IOException              Nếu có lỗi khi đọc/ghi file
-     */
+    // Mã hóa file sử dụng RSA hybrid
     public static void encryptFile(File inputFile, File outputFile, PublicKey publicKey)
             throws GeneralSecurityException, IOException {
         if (inputFile == null || outputFile == null) {
-            throw new IllegalArgumentException("Input and output files cannot be null");
+            throw new IllegalArgumentException("File đầu vào và đầu ra không được null");
         }
         if (!inputFile.exists()) {
-            throw new FileNotFoundException("Input file does not exist: " + inputFile.getPath());
+            throw new FileNotFoundException("File đầu vào không tồn tại: " + inputFile.getPath());
         }
         if (inputFile.length() == 0) {
-            throw new IllegalArgumentException("Input file is empty");
+            throw new IllegalArgumentException("File đầu vào rỗng");
         }
 
         try {
@@ -247,70 +223,61 @@ public class RSAHybridEncryption {
                 }
             }
         } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
-            throw new GeneralSecurityException("Error initializing encryption algorithm: " + e.getMessage(), e);
+            throw new GeneralSecurityException("Lỗi khi khởi tạo: " + e.getMessage(), e);
         } catch (InvalidKeyException e) {
-            throw new GeneralSecurityException("Invalid key: " + e.getMessage(), e);
+            throw new GeneralSecurityException("Khóa không hợp lệ: " + e.getMessage(), e);
         } catch (IllegalBlockSizeException | BadPaddingException e) {
-            throw new GeneralSecurityException("Error during encryption: " + e.getMessage(), e);
+            throw new GeneralSecurityException("Lỗi trong quá trình mã hóa: " + e.getMessage(), e);
         }
     }
 
-    /**
-     * Giải mã file đã được mã hóa bằng RSA hybrid encryption với streaming
-     * 
-     * @param inputFile  File cần giải mã
-     * @param outputFile File kết quả
-     * @param privateKey Khóa bí mật RSA
-     * @throws GeneralSecurityException Nếu có lỗi trong quá trình giải mã
-     * @throws IOException              Nếu có lỗi khi đọc/ghi file
-     */
     public static void decryptFile(File inputFile, File outputFile, PrivateKey privateKey)
             throws GeneralSecurityException, IOException {
         if (inputFile == null || outputFile == null) {
-            throw new IllegalArgumentException("Input and output files cannot be null");
+            throw new IllegalArgumentException("File đầu vào và đầu ra không được null");
         }
         if (!inputFile.exists()) {
-            throw new FileNotFoundException("Input file does not exist: " + inputFile.getPath());
+            throw new FileNotFoundException("File đầu vào không tồn tại: " + inputFile.getPath());
         }
         if (inputFile.length() < MAGIC_NUMBER_LENGTH + 8) {
-            throw new IllegalArgumentException("Input file is too short");
+            throw new IllegalArgumentException("File đầu vào quá ngắn");
         }
 
         try (FileInputStream fis = new FileInputStream(inputFile)) {
             // 1. Đọc và kiểm tra magic number
             byte[] magic = new byte[MAGIC_NUMBER_LENGTH];
             if (readBytes(fis, magic) != MAGIC_NUMBER_LENGTH || !isValidMagicNumber(magic)) {
-                throw new GeneralSecurityException("Invalid data format: not a hybrid encrypted file");
+                throw new GeneralSecurityException("Định dạng dữ liệu không hợp lệ: không phải file đã mã hóa hybrid");
             }
 
             // 2. Đọc IV length và IV
             byte[] ivLengthBytes = new byte[4];
             if (readBytes(fis, ivLengthBytes) != 4) {
-                throw new GeneralSecurityException("Invalid data format: cannot read IV length");
+                throw new GeneralSecurityException("Định dạng dữ liệu không hợp lệ: không thể đọc độ dài IV");
             }
             int ivLength = bytesToInt(ivLengthBytes);
             if (ivLength <= 0 || ivLength > 16) {
-                throw new GeneralSecurityException("Invalid IV length: " + ivLength);
+                throw new GeneralSecurityException("Độ dài IV không hợp lệ: " + ivLength);
             }
 
             byte[] iv = new byte[ivLength];
             if (readBytes(fis, iv) != ivLength) {
-                throw new GeneralSecurityException("Invalid data format: cannot read IV");
+                throw new GeneralSecurityException("Định dạng dữ liệu không hợp lệ: không thể đọc IV");
             }
 
             // 3. Đọc độ dài và dữ liệu khóa AES đã mã hóa
             byte[] aesKeyLengthBytes = new byte[4];
             if (readBytes(fis, aesKeyLengthBytes) != 4) {
-                throw new GeneralSecurityException("Invalid data format: cannot read AES key length");
+                throw new GeneralSecurityException("Định dạng dữ liệu không hợp lệ: không thể đọc độ dài khóa AES");
             }
             int aesKeyLength = bytesToInt(aesKeyLengthBytes);
             if (aesKeyLength <= 0 || aesKeyLength > 512) {
-                throw new GeneralSecurityException("Invalid AES key length: " + aesKeyLength);
+                throw new GeneralSecurityException("Độ dài khóa AES không hợp lệ: " + aesKeyLength);
             }
 
             byte[] encryptedAesKey = new byte[aesKeyLength];
             if (readBytes(fis, encryptedAesKey) != aesKeyLength) {
-                throw new GeneralSecurityException("Invalid data format: cannot read AES key");
+                throw new GeneralSecurityException("Định dạng dữ liệu không hợp lệ: không thể đọc khóa AES");
             }
 
             // 4. Giải mã khóa AES bằng RSA
@@ -341,15 +308,15 @@ public class RSAHybridEncryption {
                 }
             }
         } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
-            throw new GeneralSecurityException("Error initializing decryption algorithm: " + e.getMessage(), e);
+            throw new GeneralSecurityException("Lỗi khi khởi tạo thuật toán giải mã: " + e.getMessage(), e);
         } catch (InvalidKeyException e) {
-            throw new GeneralSecurityException("Invalid key: " + e.getMessage(), e);
+            throw new GeneralSecurityException("Khóa không hợp lệ: " + e.getMessage(), e);
         } catch (IllegalBlockSizeException | BadPaddingException e) {
-            throw new GeneralSecurityException("Error during decryption: " + e.getMessage(), e);
+            throw new GeneralSecurityException("Lỗi trong quá trình giải mã: " + e.getMessage(), e);
         }
     }
 
-    // Helper method để đọc bytes từ input stream
+    // Helper method
     private static int readBytes(InputStream inputStream, byte[] buffer) throws IOException {
         int totalRead = 0;
         int read;

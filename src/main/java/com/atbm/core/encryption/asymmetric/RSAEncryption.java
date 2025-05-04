@@ -1,26 +1,17 @@
 package com.atbm.core.encryption.asymmetric;
 
 import javax.crypto.Cipher;
-import java.security.*;
 import java.security.Key;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import com.atbm.core.encryption.EncryptionAlgorithm;
 
+// Đây là class kế thừa AsymmetricEncryption, thực hiện các phương thức cụ thể cho RSA
 public class RSAEncryption extends AsymmetricEncryption {
 
-    // RSA key sizes: 1024, 2048, 4096 bits
     public static final int[] SUPPORTED_KEY_SIZES = { 1024, 2048, 4096 };
 
-    // Default padding for simplicity, could be configurable
+    // Mặc định dùng PKCS1Padding
     private String padding = "PKCS1Padding";
-
-    // Ngưỡng kích thước dữ liệu để sử dụng hybrid encryption (bytes)
-    // Giá trị này được tính toán dựa trên kích thước khóa RSA và padding
-    // Với PKCS1Padding, kích thước tối đa có thể mã hóa = keySize/8 - 11 bytes
-    private static final int HYBRID_THRESHOLD = 100; // Có thể điều chỉnh tùy theo nhu cầu
 
     public RSAEncryption(int keySize) {
         super("RSA", validateKeySize(keySize));
@@ -28,10 +19,10 @@ public class RSAEncryption extends AsymmetricEncryption {
 
     public RSAEncryption(int keySize, String padding) {
         super("RSA", validateKeySize(keySize));
-        // TODO: Validate supported paddings for RSA
         this.padding = padding;
     }
 
+    // Kiểm tra hợp lệ của RSA key size
     private static int validateKeySize(int keySize) {
         boolean supported = false;
         for (int size : SUPPORTED_KEY_SIZES) {
@@ -47,29 +38,19 @@ public class RSAEncryption extends AsymmetricEncryption {
         return keySize;
     }
 
-    /**
-     * Tính toán ngưỡng kích thước dữ liệu để sử dụng hybrid encryption
-     * Dựa trên kích thước khóa RSA và padding scheme
-     * 
-     * @param keySize Kích thước khóa RSA (bits)
-     * @param padding Padding scheme
-     * @return Ngưỡng kích thước dữ liệu (bytes)
-     */
+    // Phương thức này tính toán ngưỡng kích thước dữ liệu để sử dụng hybrid RSA
     private static int calculateHybridThreshold(int keySize, String padding) {
-        // Với PKCS1Padding, kích thước tối đa có thể mã hóa = keySize/8 - 11 bytes
+        // 11 bytes là kích thước của padding PKCS1Padding
         if (padding.equals("PKCS1Padding")) {
             return (keySize / 8) - 11;
-        }
-        // Với OAEP, kích thước tối đa có thể mã hóa = keySize/8 - 42 bytes
-        else if (padding.equals("OAEPWithSHA-1AndMGF1Padding") ||
+            // 42 bytes là kích thước của padding OAEP
+        } else if (padding.equals("OAEPWithSHA-1AndMGF1Padding") ||
                 padding.equals("OAEPWithSHA-256AndMGF1Padding")) {
             return (keySize / 8) - 42;
-        }
-        // Với NoPadding, kích thước tối đa có thể mã hóa = keySize/8 bytes
-        else if (padding.equals("NoPadding")) {
+        } else if (padding.equals("NoPadding")) {
             return keySize / 8;
         }
-        // Mặc định sử dụng PKCS1Padding
+        // Mặc định dùng PKCS1Padding
         return (keySize / 8) - 11;
     }
 
@@ -78,45 +59,32 @@ public class RSAEncryption extends AsymmetricEncryption {
         return "RSA";
     }
 
-    /**
-     * Encrypts data using the public key.
-     * Uses hybrid encryption for large data.
-     */
+    // Phuownng thức mã hóa sử dụng public key
     public byte[] encryptWithPublicKey(byte[] data, PublicKey publicKey) throws Exception {
-        // Sử dụng hybrid encryption cho dữ liệu lớn
+        // Hybrid RSA cho dữ liệu lớn
         if (data.length > calculateHybridThreshold(keySize, padding)) {
             return RSAHybridEncryption.encrypt(data, publicKey);
         }
 
-        // Sử dụng RSA trực tiếp cho dữ liệu nhỏ
+        // RSA trực tiếp cho dữ liệu nhỏ
         Cipher cipher = Cipher.getInstance(algorithm + "/ECB/" + padding);
         cipher.init(Cipher.ENCRYPT_MODE, publicKey);
         return cipher.doFinal(data);
     }
 
-    /**
-     * Decrypts data using the private key.
-     * Handles both direct RSA and hybrid encryption.
-     */
+    // Phương thức giải mã sử dụng private key
     public byte[] decryptWithPrivateKey(byte[] encryptedData, PrivateKey privateKey) throws Exception {
         try {
-            // Thử giải mã bằng RSA trực tiếp trước
+            // thử với RSA trực tiếp
             Cipher cipher = Cipher.getInstance(algorithm + "/ECB/" + padding);
             cipher.init(Cipher.DECRYPT_MODE, privateKey);
             return cipher.doFinal(encryptedData);
         } catch (Exception e) {
-            // Nếu thất bại, thử giải mã bằng hybrid encryption
+            // nếu thất bại, dùng hybrid RSA
             return RSAHybridEncryption.decrypt(encryptedData, privateKey);
         }
     }
 
-    // --- Interface Methods (Adaptation) ---
-
-    /**
-     * Encrypts using the provided key. Assumes it's a PublicKey.
-     * 
-     * @throws IllegalArgumentException if the key is not a PublicKey.
-     */
     @Override
     public byte[] encrypt(byte[] data, Key key) throws Exception {
         if (!(key instanceof PublicKey)) {
@@ -125,11 +93,6 @@ public class RSAEncryption extends AsymmetricEncryption {
         return encryptWithPublicKey(data, (PublicKey) key);
     }
 
-    /**
-     * Decrypts using the provided key. Assumes it's a PrivateKey.
-     * 
-     * @throws IllegalArgumentException if the key is not a PrivateKey.
-     */
     @Override
     public byte[] decrypt(byte[] encryptedData, Key key) throws Exception {
         if (!(key instanceof PrivateKey)) {
@@ -138,12 +101,11 @@ public class RSAEncryption extends AsymmetricEncryption {
         return decryptWithPrivateKey(encryptedData, (PrivateKey) key);
     }
 
+    // Trả về các padding hỗ trợ RSA
     @Override
     public String[] getSupportedPaddings() {
         // Common paddings for RSA
         return new String[] { "PKCS1Padding", "OAEPWithSHA-1AndMGF1Padding", "OAEPWithSHA-256AndMGF1Padding",
                 "NoPadding" };
     }
-
-    // generateKeyPair is inherited from AsymmetricEncryption
 }
