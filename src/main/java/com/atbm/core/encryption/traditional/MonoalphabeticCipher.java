@@ -3,6 +3,7 @@ package com.atbm.core.encryption.traditional;
 import java.security.Key;
 import java.nio.charset.StandardCharsets;
 
+// Class này mã hóa và giải mã dữ liệu sử dụng Monoalphabetic Cipher
 public class MonoalphabeticCipher extends TraditionalEncryption {
     public MonoalphabeticCipher() {
         super("Monoalphabetic");

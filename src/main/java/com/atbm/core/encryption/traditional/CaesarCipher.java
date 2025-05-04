@@ -2,6 +2,7 @@ package com.atbm.core.encryption.traditional;
 
 import java.security.Key;
 
+// Class này mã hóa và giải mã dữ liệu sử dụng Caesar Cipher
 public class CaesarCipher extends TraditionalEncryption {
 
     private int shift;
@@ -15,7 +16,7 @@ public class CaesarCipher extends TraditionalEncryption {
         this.shift = shift;
     }
 
-    // Mã hóa dữ liệu
+    // Mã hóa
     @Override
     public byte[] encrypt(byte[] data, Key key) throws Exception {
         if (shift == 0 || data == null || data.length == 0)
@@ -27,7 +28,7 @@ public class CaesarCipher extends TraditionalEncryption {
         return result;
     }
 
-    // Giải mã dữ liệu
+    // Giải mã
     @Override
     public byte[] decrypt(byte[] encryptedData, Key key) throws Exception {
         if (shift == 0 || encryptedData == null || encryptedData.length == 0)
@@ -39,7 +40,7 @@ public class CaesarCipher extends TraditionalEncryption {
         return result;
     }
 
-    // Phương thức dịch byte, chỉ dịch các ký tự alphabet
+    // Phương thức dịch byte
     private byte shiftByte(byte b, int shiftAmount) {
         char c = (char) b;
         if (c >= 'a' && c <= 'z') {
@@ -56,7 +57,7 @@ public class CaesarCipher extends TraditionalEncryption {
         return b;
     }
 
-    // Caesar không sử dụng các mode/padding chuẩn
+    // Caesar không sử dụng các mode/padding
     @Override
     public String[] getSupportedModes() {
         return new String[] { "None" };

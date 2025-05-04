@@ -2,6 +2,7 @@ package com.atbm.core.encryption.traditional;
 
 import java.security.Key;
 
+// Class này mã hóa và giải mã dữ liệu sử dụng Vigenere Cipher
 public class VigenereCipher extends TraditionalEncryption {
 
     private String keyword;
@@ -15,36 +16,26 @@ public class VigenereCipher extends TraditionalEncryption {
         if (keyword == null || keyword.isEmpty()) {
             throw new IllegalArgumentException("Keyword cannot be null or empty.");
         }
-        // Convert keyword to uppercase and ensure it only contains letters for
-        // simplicity
         this.keyword = keyword.toUpperCase().replaceAll("[^A-Z]", "");
         if (this.keyword.isEmpty()) {
             throw new IllegalArgumentException("Keyword must contain at least one letter.");
         }
     }
 
-    /**
-     * Encrypts data using the Vigenere cipher logic.
-     * The Key parameter is ignored.
-     */
     @Override
     public byte[] encrypt(byte[] data, Key key) throws Exception {
         if (keyword == null || keyword.isEmpty()) {
             throw new IllegalStateException("Keyword must be set before encryption");
         }
-        return process(data, true); // true for encrypt
+        return process(data, true);
     }
 
-    /**
-     * Decrypts data using the Vigenere cipher logic.
-     * The Key parameter is ignored.
-     */
     @Override
     public byte[] decrypt(byte[] encryptedData, Key key) throws Exception {
         if (keyword == null || keyword.isEmpty()) {
             throw new IllegalStateException("Keyword must be set before decryption");
         }
-        return process(encryptedData, false); // false for decrypt
+        return process(encryptedData, false);
     }
 
     private byte[] process(byte[] input, boolean encrypt) {
@@ -60,32 +51,30 @@ public class VigenereCipher extends TraditionalEncryption {
 
         for (int i = 0; i < input.length; i++) {
             char inputChar = (char) input[i];
-            byte resultByte = input[i]; // Default to original byte if not a letter
+            byte resultByte = input[i];
 
             if (inputChar >= 'A' && inputChar <= 'Z') {
                 char keyChar = keyword.charAt(keywordIndex % keyword.length());
                 int shift = keyChar - 'A';
                 if (!encrypt) {
-                    shift = 26 - shift; // Reverse shift for decryption
+                    shift = 26 - shift;
                 }
                 resultByte = (byte) ('A' + ((inputChar - 'A' + shift + 26) % 26));
-                keywordIndex++; // Only increment keyword index for letters
+                keywordIndex++;
             } else if (inputChar >= 'a' && inputChar <= 'z') {
                 char keyChar = keyword.charAt(keywordIndex % keyword.length());
-                int shift = keyChar - 'A'; // Keyword is uppercase
+                int shift = keyChar - 'A';
                 if (!encrypt) {
                     shift = 26 - shift;
                 }
                 resultByte = (byte) ('a' + ((inputChar - 'a' + shift + 26) % 26));
                 keywordIndex++;
             }
-            // Non-alphabetic characters are passed through unchanged
             output[i] = resultByte;
         }
         return output;
     }
 
-    // Vigenere doesn't use standard modes/paddings
     @Override
     public String[] getSupportedModes() {
         return new String[] { "None" };

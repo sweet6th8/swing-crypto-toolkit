@@ -2,6 +2,7 @@ package com.atbm.core.encryption;
 
 import java.security.Key;
 
+// Interface định nghĩa các phương thức mã hóa và giải mã,...
 public interface EncryptionAlgorithm {
     byte[] encrypt(byte[] data, Key key) throws Exception;
 

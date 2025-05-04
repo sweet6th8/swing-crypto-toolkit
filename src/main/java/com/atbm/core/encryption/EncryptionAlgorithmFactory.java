@@ -16,6 +16,7 @@ import com.atbm.core.encryption.symmetric.CamelliaEncryption;
 import com.atbm.core.encryption.symmetric.CAST5Encryption;
 import com.atbm.core.encryption.symmetric.RC5Encryption;
 
+// Factory pattern để tạo các thuật toán mã hóa
 public class EncryptionAlgorithmFactory {
     public static EncryptionAlgorithm createAlgorithm(String algorithmName) {
         switch (algorithmName.toLowerCase()) {

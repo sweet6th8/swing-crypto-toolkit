@@ -2,6 +2,7 @@ package com.atbm.core.encryption.traditional;
 
 import com.atbm.core.encryption.EncryptionAlgorithm;
 
+// Class này là lớp cha cho các thuật toán mã hóa cổ điển
 public abstract class TraditionalEncryption implements EncryptionAlgorithm {
     protected String name;
 

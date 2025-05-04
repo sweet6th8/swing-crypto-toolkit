@@ -3,11 +3,13 @@ package com.atbm.core.encryption.traditional;
 import java.security.Key;
 import java.nio.charset.StandardCharsets;
 
+// Class này mã hóa và giải mã dữ liệu sử dụng Hill Cipher
 public class HillCipher extends TraditionalEncryption {
     public HillCipher() {
         super("Hill");
     }
 
+    // Tính toán nghịch đảo modular của a mod m
     private int modInverse(int a, int m) {
         a = a % m;
         for (int x = 1; x < m; x++) {
@@ -17,6 +19,7 @@ public class HillCipher extends TraditionalEncryption {
         throw new IllegalArgumentException("Không có nghịch đảo modular!");
     }
 
+    // Phương thức này phân tích khóa thành ma trận 2x2
     private int[][] parseKey(String key) {
         String[] nums = key.split(",");
         if (nums.length != 4)
@@ -34,7 +37,7 @@ public class HillCipher extends TraditionalEncryption {
         int i = 0;
 
         while (i < plainText.length()) {
-            // Skip non-alphabetic characters
+            // Skip non-alphabetic
             while (i < plainText.length() && !Character.isLetter(plainText.charAt(i))) {
                 result.append(plainText.charAt(i));
                 i++;
@@ -43,32 +46,29 @@ public class HillCipher extends TraditionalEncryption {
             if (i >= plainText.length())
                 break;
 
-            // Get first character of pair and remember its case
             char c1 = plainText.charAt(i);
             boolean isC1Lower = Character.isLowerCase(c1);
             c1 = Character.toUpperCase(c1);
             i++;
 
-            // Skip non-alphabetic characters
+            // Skip non-alphabetic
             while (i < plainText.length() && !Character.isLetter(plainText.charAt(i))) {
                 result.append(plainText.charAt(i));
                 i++;
             }
 
             if (i >= plainText.length()) {
-                // If we have only one letter at the end, add padding
+
                 result.append(isC1Lower ? Character.toLowerCase(c1) : c1);
                 result.append('X');
                 break;
             }
 
-            // Get second character of pair and remember its case
             char c2 = plainText.charAt(i);
             boolean isC2Lower = Character.isLowerCase(c2);
             c2 = Character.toUpperCase(c2);
             i++;
 
-            // Process the pair
             int[] vec = { c1 - 'A', c2 - 'A' };
             int enc1 = (k[0][0] * vec[0] + k[0][1] * vec[1]) % 26;
             int enc2 = (k[1][0] * vec[0] + k[1][1] * vec[1]) % 26;
@@ -77,7 +77,6 @@ public class HillCipher extends TraditionalEncryption {
             if (enc2 < 0)
                 enc2 += 26;
 
-            // Restore original case
             result.append(isC1Lower ? Character.toLowerCase((char) ('A' + enc1)) : (char) ('A' + enc1));
             result.append(isC2Lower ? Character.toLowerCase((char) ('A' + enc2)) : (char) ('A' + enc2));
         }
@@ -99,7 +98,7 @@ public class HillCipher extends TraditionalEncryption {
         int i = 0;
 
         while (i < cipherText.length()) {
-            // Skip non-alphabetic characters
+            // Skip non-alphabetic
             while (i < cipherText.length() && !Character.isLetter(cipherText.charAt(i))) {
                 result.append(cipherText.charAt(i));
                 i++;
@@ -108,31 +107,28 @@ public class HillCipher extends TraditionalEncryption {
             if (i >= cipherText.length())
                 break;
 
-            // Get first character of pair and remember its case
             char c1 = cipherText.charAt(i);
             boolean isC1Lower = Character.isLowerCase(c1);
             c1 = Character.toUpperCase(c1);
             i++;
 
-            // Skip non-alphabetic characters
+            // Skip non-alphabetic
             while (i < cipherText.length() && !Character.isLetter(cipherText.charAt(i))) {
                 result.append(cipherText.charAt(i));
                 i++;
             }
 
             if (i >= cipherText.length()) {
-                // If we have only one letter at the end, just append it
+
                 result.append(isC1Lower ? Character.toLowerCase(c1) : c1);
                 break;
             }
 
-            // Get second character of pair and remember its case
             char c2 = cipherText.charAt(i);
             boolean isC2Lower = Character.isLowerCase(c2);
             c2 = Character.toUpperCase(c2);
             i++;
 
-            // Process the pair
             int[] vec = { c1 - 'A', c2 - 'A' };
             int dec1 = (inv[0][0] * vec[0] + inv[0][1] * vec[1]) % 26;
             int dec2 = (inv[1][0] * vec[0] + inv[1][1] * vec[1]) % 26;
@@ -141,13 +137,11 @@ public class HillCipher extends TraditionalEncryption {
             if (dec2 < 0)
                 dec2 += 26;
 
-            // Restore original case
             result.append(isC1Lower ? Character.toLowerCase((char) ('A' + dec1)) : (char) ('A' + dec1));
             result.append(isC2Lower ? Character.toLowerCase((char) ('A' + dec2)) : (char) ('A' + dec2));
         }
 
         String res = result.toString();
-        // Remove padding 'X' if it was added during encryption
         if (res.endsWith("X") && res.length() > 1) {
             res = res.substring(0, res.length() - 1);
         }
