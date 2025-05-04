@@ -1,14 +1,11 @@
 package com.atbm.ui.panels;
 
-// Import model classes
-import com.atbm.ui.MainFrame;
 import javax.crypto.SecretKey;
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.security.KeyPair;
-import java.util.Base64;
 import com.atbm.core.encryption.EncryptionAlgorithm;
 import com.atbm.core.encryption.EncryptionAlgorithmFactory;
 import com.atbm.core.encryption.symmetric.SymmetricEncryption;
@@ -24,9 +21,10 @@ import com.atbm.core.encryption.symmetric.BlowfishEncryption;
 import com.atbm.core.encryption.symmetric.ChaCha20Poly1305Encryption;
 import com.atbm.core.encryption.asymmetric.RSAEncryption;
 
+// Class này là panel cho việc tạo khóa
 public class KeyGenPanel extends JPanel {
 
-    private JTextField generatedKeyField; // Displays generated key or path
+    private JTextField generatedKeyField;
     private JComboBox<String> algorithmComboBox;
     private JComboBox<Integer> keySizeComboBox;
     private JButton generateButton;
@@ -36,7 +34,7 @@ public class KeyGenPanel extends JPanel {
     private JFileChooser directoryChooser;
     private KeyListPanel keyListPanel;
 
-    // Placeholder for generated key/keypair
+    // Placeholder cho khóa đã tạo
     private Object generatedKeyObject = null;
 
     public KeyGenPanel() {
@@ -46,7 +44,6 @@ public class KeyGenPanel extends JPanel {
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.anchor = GridBagConstraints.WEST;
 
-        // --- Generated Key Display ---
         gbc.gridx = 0;
         gbc.gridy = 0;
         gbc.gridwidth = 2;
@@ -60,9 +57,7 @@ public class KeyGenPanel extends JPanel {
         add(generatedKeyField, gbc);
 
         gbc.gridx = 1;
-        gbc.weightx = 0; // Reset weight
-        // Placeholder button, maybe for copying key?
-        // add(new JButton("..."), gbc);
+        gbc.weightx = 0;
 
         gbc.gridx = 0;
         gbc.gridy++;
@@ -86,7 +81,7 @@ public class KeyGenPanel extends JPanel {
 
         // Add Action Listeners
         setupActionListeners();
-        updateKeySizeOptions(); // Initial population of key sizes
+        updateKeySizeOptions();
     }
 
     public void setKeyListPanel(KeyListPanel panel) {
@@ -222,6 +217,7 @@ public class KeyGenPanel extends JPanel {
                 !selectedAlgorithm.equals("Hill"));
     }
 
+    // Tạo panel cho việc xuất kết quả
     private JPanel createExportPanel() {
         JPanel panel = new JPanel(new GridBagLayout());
         panel.setBorder(BorderFactory.createTitledBorder("Xuất kết quả"));
@@ -230,40 +226,34 @@ public class KeyGenPanel extends JPanel {
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.anchor = GridBagConstraints.WEST;
 
-        // Directory Chooser Button
         JButton chooseDirButton = new JButton("Chọn thư mục");
         gbc.gridx = 0;
         gbc.gridy = 0;
         panel.add(chooseDirButton, gbc);
 
-        // Directory Path Field
         gbc.gridx = 1;
         gbc.gridwidth = 3;
         gbc.weightx = 1.0;
-        outputDirField = new JTextField("./keys"); // Default directory
+        outputDirField = new JTextField("./keys"); // mặc định
         panel.add(outputDirField, gbc);
 
-        // Base Filename
         gbc.gridx = 1;
         gbc.gridy = 1;
         gbc.gridwidth = 1;
-        gbc.weightx = 0.8; // Give it more space
+        gbc.weightx = 0.8;
         baseFileNameField = new JTextField();
         panel.add(baseFileNameField, gbc);
-        updateBaseFileName(); // Initial name based on algorithm
+        updateBaseFileName();
 
-        // .keys Label
         gbc.gridx = 2;
-        gbc.weightx = 0; // Reset weight
+        gbc.weightx = 0;
         panel.add(new JLabel(".keys"), gbc);
 
-        // Export Button
         gbc.gridx = 3;
         gbc.weightx = 0;
         exportButton = new JButton("Xuất file");
         panel.add(exportButton, gbc);
 
-        // Setup Directory Chooser
         directoryChooser = new JFileChooser();
         directoryChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
         chooseDirButton.addActionListener(e -> {
@@ -277,6 +267,7 @@ public class KeyGenPanel extends JPanel {
         return panel;
     }
 
+    // Thêm Action Listeners
     private void setupActionListeners() {
         algorithmComboBox.addActionListener(e -> {
             updateKeySizeOptions();
@@ -295,6 +286,7 @@ public class KeyGenPanel extends JPanel {
         exportButton.addActionListener(e -> exportKeyAction());
     }
 
+    // Cập nhật kích thước khóa
     private void updateKeySizeOptions() {
         String selectedAlgorithm = (String) algorithmComboBox.getSelectedItem();
         keySizeComboBox.removeAllItems();
@@ -309,7 +301,7 @@ public class KeyGenPanel extends JPanel {
                     break;
                 case "ChaCha20-Poly1305":
                     keySizeComboBox.addItem(256);
-                    keySizeComboBox.setEnabled(false); // Chỉ hỗ trợ 256-bit
+                    keySizeComboBox.setEnabled(false);
                     break;
                 case "DESede":
                     keySizeComboBox.addItem(112);
@@ -330,7 +322,6 @@ public class KeyGenPanel extends JPanel {
                     keySizeComboBox.setSelectedItem(2048);
                     keySizeComboBox.setEnabled(true);
                     break;
-                // Ẩn key size cho thuật toán truyền thống
                 case "Caesar":
                 case "Vigenere":
                     keySizeComboBox.setEnabled(false);
@@ -354,6 +345,7 @@ public class KeyGenPanel extends JPanel {
         }
     }
 
+    // Tạo khóa
     private void generateKeyAction() {
         String algorithm = (String) algorithmComboBox.getSelectedItem();
         Integer keySize = (Integer) keySizeComboBox.getSelectedItem();
@@ -367,7 +359,6 @@ public class KeyGenPanel extends JPanel {
             return;
         }
 
-        // Handle traditional ciphers where key size might not be selected/relevant
         boolean isTraditional = !isSymmetric(algorithm) && !isAsymmetric(algorithm);
         if (algorithm == null || (!isTraditional && keySize == null)) {
             JOptionPane.showMessageDialog(this,
@@ -377,14 +368,13 @@ public class KeyGenPanel extends JPanel {
         }
 
         try {
-            // Get algorithm instance
             EncryptionAlgorithm algoInstance = EncryptionAlgorithmFactory.createAlgorithm(algorithm);
 
             if (algoInstance instanceof SymmetricEncryption) {
                 SymmetricEncryption symAlgo = (SymmetricEncryption) algoInstance;
                 SecretKey key = symAlgo.generateKey();
                 generatedKeyObject = key;
-                // Display key info
+                // Hiển thị thông tin khóa
                 generatedKeyField.setText(String.format("%s Key [%d bits] generated (in memory)",
                         key.getAlgorithm(), keySize));
                 JOptionPane.showMessageDialog(this, "Khóa đối xứng đã được tạo thành công (trong bộ nhớ)!",
@@ -393,20 +383,20 @@ public class KeyGenPanel extends JPanel {
                 AsymmetricEncryption asymAlgo = (AsymmetricEncryption) algoInstance;
                 KeyPair keyPair = asymAlgo.generateKeyPair();
                 generatedKeyObject = keyPair;
-                // Display key info
+                // Hiển thị thông tin khóa
                 generatedKeyField.setText(String.format("%s KeyPair [%d bits] generated (in memory)",
                         keyPair.getPublic().getAlgorithm(), keySize));
                 JOptionPane.showMessageDialog(this, "Cặp khóa bất đối xứng đã được tạo thành công (trong bộ nhớ)!",
                         "Thành công", JOptionPane.INFORMATION_MESSAGE);
             } else {
-                // Handle Traditional Ciphers - Key generation might not apply
+
                 generatedKeyField.setText(algorithm + " selected. No key generation needed.");
-                generatedKeyObject = null; // Or a placeholder if needed for export?
+                generatedKeyObject = null;
                 JOptionPane.showMessageDialog(this, "Thuật toán cổ điển được chọn. Không cần tạo khóa.", "Thông báo",
                         JOptionPane.INFORMATION_MESSAGE);
             }
 
-            // Refresh the key list after successful key generation
+            // Cập nhật danh sách khóa sau khi tạo khóa thành công
             if (keyListPanel != null) {
                 keyListPanel.refreshKeyList();
             }
@@ -415,36 +405,32 @@ public class KeyGenPanel extends JPanel {
             generatedKeyField.setText("Lỗi tạo khóa");
             JOptionPane.showMessageDialog(this, "Lỗi khi tạo khóa: " + ex.getMessage(), "Lỗi",
                     JOptionPane.ERROR_MESSAGE);
-            ex.printStackTrace(); // Log detailed error
-            generatedKeyObject = null; // Ensure object is null on error
+            ex.printStackTrace();
+            generatedKeyObject = null;
         }
     }
 
+    // Xuất khóa
     private void exportKeyAction() {
         String algorithm = (String) algorithmComboBox.getSelectedItem();
 
-        // Thêm xử lý cho thuật toán truyền thống
         if ("Caesar".equals(algorithm) || "Vigenere".equals(algorithm) ||
                 "Monoalphabetic".equals(algorithm) || "Affine".equals(algorithm) || "Hill".equals(algorithm)) {
             String key = (String) generatedKeyObject;
 
-            // Đặt tên file mặc định
             String defaultFileName = algorithm + ".key";
             JFileChooser fileChooser = new JFileChooser();
 
-            // Đặt thư mục mặc định là ./keys (tạo nếu chưa có)
             File keyDir = new File(System.getProperty("user.dir"), "keys");
             if (!keyDir.exists())
                 keyDir.mkdirs();
             fileChooser.setCurrentDirectory(keyDir);
 
-            // Đặt tên file mặc định
             fileChooser.setSelectedFile(new File(keyDir, defaultFileName));
             fileChooser.setDialogTitle("Lưu khóa truyền thống");
 
             if (fileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
                 File file = fileChooser.getSelectedFile();
-                // Cảnh báo nếu file đã tồn tại
                 if (file.exists()) {
                     int result = JOptionPane.showConfirmDialog(
                             this,
@@ -452,13 +438,12 @@ public class KeyGenPanel extends JPanel {
                             "Cảnh báo",
                             JOptionPane.YES_NO_OPTION);
                     if (result != JOptionPane.YES_OPTION) {
-                        return; // Không ghi đè, thoát hàm
+                        return;
                     }
                 }
                 try {
                     Files.write(file.toPath(), key.getBytes(StandardCharsets.UTF_8));
                     JOptionPane.showMessageDialog(this, "Đã lưu key truyền thống!");
-                    // Refresh key list after successful save
                     if (keyListPanel != null) {
                         keyListPanel.refreshKeyList();
                     }
@@ -471,14 +456,11 @@ public class KeyGenPanel extends JPanel {
         }
 
         if (generatedKeyObject == null) {
-            // Allow exporting even if no key was *generated*, e.g., for traditional config?
-            // Maybe check based on algorithm type instead?
             if (isSymmetric(algorithm) || isAsymmetric(algorithm)) {
                 JOptionPane.showMessageDialog(this, "Vui lòng tạo khóa đối xứng/bất đối xứng trước khi xuất.", "Lỗi",
                         JOptionPane.ERROR_MESSAGE);
                 return;
             } else {
-                // Handle export for traditional ciphers if needed (e.g., save shift/keyword?)
                 JOptionPane.showMessageDialog(this, "Xuất file không áp dụng cho thuật toán này.", "Thông báo",
                         JOptionPane.INFORMATION_MESSAGE);
                 return;
@@ -496,7 +478,7 @@ public class KeyGenPanel extends JPanel {
 
         File outputDir = new File(dirPath);
         if (!outputDir.exists()) {
-            if (!outputDir.mkdirs()) { // Try to create directory
+            if (!outputDir.mkdirs()) {
                 JOptionPane.showMessageDialog(this, "Không thể tạo thư mục: " + dirPath, "Lỗi",
                         JOptionPane.ERROR_MESSAGE);
                 return;
@@ -512,7 +494,6 @@ public class KeyGenPanel extends JPanel {
             if (generatedKeyObject instanceof SecretKey) {
                 String filePath = dirPath + File.separator + baseName + ".key";
                 File file = new File(filePath);
-                // Cảnh báo nếu file đã tồn tại
                 if (file.exists()) {
                     int result = JOptionPane.showConfirmDialog(
                             this,
@@ -520,13 +501,12 @@ public class KeyGenPanel extends JPanel {
                             "Cảnh báo",
                             JOptionPane.YES_NO_OPTION);
                     if (result != JOptionPane.YES_OPTION) {
-                        return; // Không ghi đè, thoát hàm
+                        return;
                     }
                 }
                 KeyManager.saveKey((SecretKey) generatedKeyObject, filePath);
                 JOptionPane.showMessageDialog(this, "Xuất khóa đối xứng thành công tới:\n" + filePath, "Thành công",
                         JOptionPane.INFORMATION_MESSAGE);
-                // Refresh key list after successful save
                 if (keyListPanel != null) {
                     keyListPanel.refreshKeyList();
                 }
@@ -536,7 +516,6 @@ public class KeyGenPanel extends JPanel {
                 String privateKeyPath = dirPath + File.separator + baseName + ".pri";
                 File pubFile = new File(publicKeyPath);
                 File priFile = new File(privateKeyPath);
-                // Cảnh báo nếu file đã tồn tại
                 if (pubFile.exists() || priFile.exists()) {
                     int result = JOptionPane.showConfirmDialog(
                             this,
@@ -545,14 +524,13 @@ public class KeyGenPanel extends JPanel {
                             "Cảnh báo",
                             JOptionPane.YES_NO_OPTION);
                     if (result != JOptionPane.YES_OPTION) {
-                        return; // Không ghi đè, thoát hàm
+                        return;
                     }
                 }
                 KeyManager.saveKeyPair((KeyPair) generatedKeyObject, publicKeyPath, privateKeyPath);
                 JOptionPane.showMessageDialog(this,
                         "Xuất cặp khóa bất đối xứng thành công tới: \n" + publicKeyPath + "\n" + privateKeyPath,
                         "Thành công", JOptionPane.INFORMATION_MESSAGE);
-                // Refresh key list after successful save
                 if (keyListPanel != null) {
                     keyListPanel.refreshKeyList();
                 }
@@ -573,8 +551,7 @@ public class KeyGenPanel extends JPanel {
         }
     }
 
-    // Helper methods to determine algorithm type (replace with better logic if
-    // needed)
+    // Helper methods để xác định loại thuật toán
     private boolean isSymmetric(String algorithm) {
         if (algorithm == null)
             return false;
@@ -587,7 +564,7 @@ public class KeyGenPanel extends JPanel {
         return algorithm.equals("RSA");
     }
 
-    // Main method for testing this panel independently
+    // Main method để test độc lâp
     public static void main(String[] args) {
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
