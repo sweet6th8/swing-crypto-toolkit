@@ -34,7 +34,6 @@ public class KeyGenPanel extends JPanel {
     private JTextField baseFileNameField;
     private JButton exportButton;
     private JFileChooser directoryChooser;
-    private JButton loadKeyButton;
     private KeyListPanel keyListPanel;
 
     // Placeholder for generated key/keypair
@@ -83,8 +82,6 @@ public class KeyGenPanel extends JPanel {
         gbc.anchor = GridBagConstraints.WEST;
         gbc.weightx = 1.0;
         JPanel exportPanel = createExportPanel();
-        loadKeyButton = new JButton("Load Key");
-        exportPanel.add(loadKeyButton);
         add(exportPanel, gbc);
 
         // Add Action Listeners
@@ -296,7 +293,6 @@ public class KeyGenPanel extends JPanel {
 
         generateButton.addActionListener(e -> generateKeyAction());
         exportButton.addActionListener(e -> exportKeyAction());
-        loadKeyButton.addActionListener(e -> loadTraditionalKeyAction());
     }
 
     private void updateKeySizeOptions() {
@@ -574,29 +570,6 @@ public class KeyGenPanel extends JPanel {
             JOptionPane.showMessageDialog(this, "Lỗi không xác định khi xuất khóa: " + ex.getMessage(), "Lỗi",
                     JOptionPane.ERROR_MESSAGE);
             ex.printStackTrace();
-        }
-    }
-
-    private void loadTraditionalKeyAction() {
-        String algorithm = (String) algorithmComboBox.getSelectedItem();
-        if (!"Caesar".equals(algorithm) && !"Vigenere".equals(algorithm) &&
-                !"Monoalphabetic".equals(algorithm) && !"Affine".equals(algorithm) && !"Hill".equals(algorithm)) {
-            JOptionPane.showMessageDialog(this, "Chỉ hỗ trợ load key cho các thuật toán truyền thống!");
-            return;
-        }
-        JFileChooser fileChooser = new JFileChooser();
-        fileChooser.setDialogTitle("Chọn file key truyền thống");
-        if (fileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
-            File file = fileChooser.getSelectedFile();
-            try {
-                String key = new String(Files.readAllBytes(file.toPath()), StandardCharsets.UTF_8);
-                generatedKeyField.setText(key);
-                generatedKeyObject = key;
-                JOptionPane.showMessageDialog(this, "Đã load key truyền thống!");
-            } catch (Exception ex) {
-                JOptionPane.showMessageDialog(this, "Lỗi khi load key: " + ex.getMessage(), "Lỗi",
-                        JOptionPane.ERROR_MESSAGE);
-            }
         }
     }
 
