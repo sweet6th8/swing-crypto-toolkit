@@ -6,6 +6,7 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import java.security.Security;
 
+// Class này mã hóa và giải mã dữ liệu sử dụng RC5
 public class RC5Encryption extends SymmetricEncryption {
     public static final int[] SUPPORTED_KEY_SIZES = { 64, 128, 192, 256 };
     public static final int DEFAULT_KEY_SIZE = 128;

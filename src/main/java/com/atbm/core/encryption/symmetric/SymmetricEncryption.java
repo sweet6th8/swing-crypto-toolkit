@@ -8,6 +8,7 @@ import java.security.Key;
 import java.security.SecureRandom;
 import com.atbm.core.encryption.EncryptionAlgorithm;
 
+// Class này là lớp cha cho các thuật toán mã hóa đối xứng
 public abstract class SymmetricEncryption implements EncryptionAlgorithm {
     protected String algorithm;
     protected String mode;
@@ -47,13 +48,11 @@ public abstract class SymmetricEncryption implements EncryptionAlgorithm {
         }
 
         if (algorithm.equals("ChaCha20-Poly1305")) {
-            // ChaCha20-Poly1305: generate nonce, encrypt, prepend nonce
-            byte[] nonce = new byte[12]; // 12 bytes nonce for ChaCha20-Poly1305
+            byte[] nonce = new byte[12];
             new SecureRandom().nextBytes(nonce);
             cipher.init(Cipher.ENCRYPT_MODE, key, new IvParameterSpec(nonce));
             byte[] encryptedData = cipher.doFinal(dataToEncrypt);
 
-            // Combine nonce and encrypted data
             byte[] result = new byte[nonce.length + encryptedData.length];
             System.arraycopy(nonce, 0, result, 0, nonce.length);
             System.arraycopy(encryptedData, 0, result, nonce.length, encryptedData.length);
@@ -101,7 +100,7 @@ public abstract class SymmetricEncryption implements EncryptionAlgorithm {
             cipher.init(Cipher.DECRYPT_MODE, key, new IvParameterSpec(nonce));
             return cipher.doFinal(encryptedData);
         } else if (mode.equals("CBC")) {
-            // Handle IV for CBC mode
+            // Xử lý IV cho CBC mode
             int ivLength = getIVLength();
             if (encryptedDataWithPrefix == null || encryptedDataWithPrefix.length < ivLength) {
                 throw new IllegalArgumentException("Invalid encrypted data length for CBC mode");
@@ -113,7 +112,7 @@ public abstract class SymmetricEncryption implements EncryptionAlgorithm {
             cipher.init(Cipher.DECRYPT_MODE, key, new IvParameterSpec(iv));
             byte[] decryptedData = cipher.doFinal(encrypted);
 
-            // Remove padding zeros if NoPadding was used
+            // Xóa padding zeros nếu NoPadding được sử dụng
             if (padding.equals("NoPadding")) {
                 int i = decryptedData.length - 1;
                 while (i >= 0 && decryptedData[i] == 0) {
@@ -127,11 +126,11 @@ public abstract class SymmetricEncryption implements EncryptionAlgorithm {
             }
             return decryptedData;
         } else {
-            // ECB mode - No IV needed
+            // ECB mode - không cần IV
             cipher.init(Cipher.DECRYPT_MODE, key);
             byte[] decryptedData = cipher.doFinal(encryptedDataWithPrefix);
 
-            // Remove padding zeros if NoPadding was used
+            // Xóa padding zeros nếu NoPadding được sử dụng
             if (padding.equals("NoPadding")) {
                 int i = decryptedData.length - 1;
                 while (i >= 0 && decryptedData[i] == 0) {
@@ -163,7 +162,7 @@ public abstract class SymmetricEncryption implements EncryptionAlgorithm {
         return new String[] { "PKCS5Padding", "NoPadding" };
     }
 
-    // Helper method to get correct IV length based on algorithm
+    // Helper method để lấy độ dài IV dựa trên thuật toán
     private int getIVLength() {
         switch (algorithm) {
             case "DES":
@@ -171,7 +170,7 @@ public abstract class SymmetricEncryption implements EncryptionAlgorithm {
             case "Blowfish":
             case "CAST5":
             case "RC5":
-                return 8; // 8 bytes cho DES, DESede, Blowfish, CAST5, RC5
+                return 8;
             default:
                 return 16; // 16 bytes cho AES, Camellia, Twofish, ...
         }

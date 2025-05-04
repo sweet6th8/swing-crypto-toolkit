@@ -6,6 +6,7 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import java.security.Security;
 
+// Class này mã hóa và giải mã dữ liệu sử dụng Twofish
 public class TwofishEncryption extends SymmetricEncryption {
     public static final int[] SUPPORTED_KEY_SIZES = { 128, 192, 256 };
 

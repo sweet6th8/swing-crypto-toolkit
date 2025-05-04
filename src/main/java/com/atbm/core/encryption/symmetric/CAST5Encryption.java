@@ -6,6 +6,7 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import java.security.Security;
 
+// Class này mã hóa và giải mã dữ liệu sử dụng CAST5
 public class CAST5Encryption extends SymmetricEncryption {
     public static final int[] SUPPORTED_KEY_SIZES = { 40, 64, 80, 96, 112, 128 };
     public static final int DEFAULT_KEY_SIZE = 128;

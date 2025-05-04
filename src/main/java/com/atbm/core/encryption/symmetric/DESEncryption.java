@@ -1,5 +1,6 @@
 package com.atbm.core.encryption.symmetric;
 
+// Class này mã hóa và giải mã dữ liệu sử dụng DES
 public class DESEncryption extends SymmetricEncryption {
 
     public static final int KEY_SIZE = 56;

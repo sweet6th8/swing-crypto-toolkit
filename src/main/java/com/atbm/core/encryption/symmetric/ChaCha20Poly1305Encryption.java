@@ -1,8 +1,6 @@
 package com.atbm.core.encryption.symmetric;
 
-import javax.crypto.SecretKey;
-import java.security.Key;
-
+// Class này mã hóa và giải mã dữ liệu sử dụng ChaCha20-Poly1305
 public class ChaCha20Poly1305Encryption extends SymmetricEncryption {
 
     public static final int KEY_SIZE = 256;

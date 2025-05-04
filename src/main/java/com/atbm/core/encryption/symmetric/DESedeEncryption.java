@@ -1,5 +1,6 @@
 package com.atbm.core.encryption.symmetric;
 
+// Class này mã hóa và giải mã dữ liệu sử dụng DESede
 public class DESedeEncryption extends SymmetricEncryption {
 
     public static final int[] SUPPORTED_KEY_SIZES = { 112, 168 };
