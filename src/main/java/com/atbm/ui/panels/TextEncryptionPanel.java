@@ -3,19 +3,14 @@ package com.atbm.ui.panels;
 import com.atbm.core.encryption.EncryptionAlgorithm;
 import com.atbm.core.encryption.EncryptionAlgorithmFactory;
 import com.atbm.core.key.KeyManager;
-import com.atbm.core.encryption.traditional.CaesarCipher;
-import com.atbm.core.encryption.traditional.VigenereCipher;
-
 import javax.swing.*;
-import javax.swing.border.TitledBorder;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Base64;
 
+// Class này là panel mã hóa/giải mã văn bản
 public class TextEncryptionPanel extends JPanel {
 
     private JTextArea inputTextArea;
@@ -29,7 +24,6 @@ public class TextEncryptionPanel extends JPanel {
     private JButton decryptButton;
     private JFileChooser fileChooser;
 
-    // Placeholder for loaded key
     private Key loadedKey = null;
     private String loadedTraditionalKey = null;
 
@@ -39,17 +33,17 @@ public class TextEncryptionPanel extends JPanel {
         setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 10, 5, 10);
-        gbc.fill = GridBagConstraints.BOTH; // Fill both horizontally and vertically
+        gbc.fill = GridBagConstraints.BOTH;
         gbc.anchor = GridBagConstraints.CENTER;
 
         fileChooser = new JFileChooser();
 
-        // --- Input Text Area ---
+        // Nhập văn bản
         gbc.gridx = 0;
         gbc.gridy = 0;
         gbc.gridwidth = 2;
         gbc.weightx = 1.0;
-        gbc.weighty = 0.4; // More vertical space
+        gbc.weighty = 0.4;
         inputTextArea = new JTextArea();
         inputTextArea.setLineWrap(true);
         inputTextArea.setWrapStyleWord(true);
@@ -57,7 +51,7 @@ public class TextEncryptionPanel extends JPanel {
         inputScrollPane.setBorder(BorderFactory.createTitledBorder("Nhập văn bản"));
         add(inputScrollPane, gbc);
 
-        // --- Output Text Area ---
+        // Xuất văn bản
         gbc.gridy++;
         outputTextArea = new JTextArea();
         outputTextArea.setLineWrap(true);
@@ -67,17 +61,17 @@ public class TextEncryptionPanel extends JPanel {
         outputScrollPane.setBorder(BorderFactory.createTitledBorder("Văn bản đã mã hóa/giải mã"));
         add(outputScrollPane, gbc);
 
-        // --- Key Input ---
+        // Nhập file key
         gbc.gridy++;
-        gbc.weighty = 0; // Reset weighty
-        gbc.fill = GridBagConstraints.HORIZONTAL; // Switch back to horizontal fill
+        gbc.weighty = 0;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
         add(createKeyInputPanel(), gbc);
 
-        // --- Algorithm Selection ---
+        // Chọn thuật toán
         gbc.gridy++;
         add(createAlgorithmSelectionPanel(), gbc);
 
-        // --- Action Buttons ---
+        // Button mã hóa/giải mã
         gbc.gridy++;
         gbc.gridwidth = 1;
         gbc.fill = GridBagConstraints.NONE;
@@ -98,8 +92,8 @@ public class TextEncryptionPanel extends JPanel {
         setAlgorithmType(currentAlgorithmType);
     }
 
+    // Tạo panel nhập file key
     private JPanel createKeyInputPanel() {
-        // Reusing the same structure as FileEncryptionPanel
         JPanel panel = new JPanel(new GridBagLayout());
         panel.setBorder(BorderFactory.createTitledBorder("Nhập File Key"));
         GridBagConstraints gbc = new GridBagConstraints();
@@ -120,8 +114,8 @@ public class TextEncryptionPanel extends JPanel {
         return panel;
     }
 
+    // Tạo panel chọn thuật toán
     private JPanel createAlgorithmSelectionPanel() {
-        // Reusing the same structure as FileEncryptionPanel
         JPanel panel = new JPanel(new GridLayout(1, 3, 10, 0));
         panel.setBorder(BorderFactory.createTitledBorder("Lựa chọn thuật toán"));
 
@@ -162,6 +156,7 @@ public class TextEncryptionPanel extends JPanel {
         return panel;
     }
 
+    // Thiết lập các listener
     private void setupActionListeners() {
         loadKeyButton.addActionListener(e -> loadKeyFile());
         algorithmComboBox.addActionListener(e -> {
@@ -183,6 +178,7 @@ public class TextEncryptionPanel extends JPanel {
         decryptButton.addActionListener(e -> performEncryptionDecryption(false));
     }
 
+    // Load file key
     private void loadKeyFile() {
         String selectedAlgorithm = (String) algorithmComboBox.getSelectedItem();
         if (selectedAlgorithm == null) {
@@ -227,10 +223,9 @@ public class TextEncryptionPanel extends JPanel {
                 } else if (upperAlgo.equals("CAESAR") || upperAlgo.equals("VIGENERE")
                         || upperAlgo.equals("MONOALPHABETIC") || upperAlgo.equals("AFFINE")
                         || upperAlgo.equals("HILL")) {
-                    // Đọc key truyền thống từ file
+
                     String keyText = new String(java.nio.file.Files.readAllBytes(keyFile.toPath()),
                             java.nio.charset.StandardCharsets.UTF_8);
-                    // Loại bỏ tiền tố "Khóa ..." nếu có
                     if (keyText.startsWith("Khóa")) {
                         keyText = keyText.substring(keyText.indexOf(":") + 1).trim();
                     }
@@ -240,7 +235,6 @@ public class TextEncryptionPanel extends JPanel {
                     return;
                 }
 
-                // Kiểm tra tên file key phải chứa tên thuật toán đang chọn
                 if (!lowerPath.contains(selectedAlgorithm.toLowerCase())) {
                     loadedKey = null;
                     keyFilePathField.setText("");
@@ -255,7 +249,6 @@ public class TextEncryptionPanel extends JPanel {
 
                 if (loadedKey != null) {
                     String keyAlgorithm = loadedKey.getAlgorithm();
-                    // Debug log để kiểm tra giá trị thực tế
                     System.out.println(
                             "DEBUG: selectedAlgorithm = " + selectedAlgorithm + ", keyAlgorithm = " + keyAlgorithm);
                     if (!keyAlgorithm.equalsIgnoreCase(selectedAlgorithm)) {
@@ -286,6 +279,7 @@ public class TextEncryptionPanel extends JPanel {
         }
     }
 
+    // Cập nhật mode và padding
     private void updateModesAndPaddings() {
         String selectedAlgorithm = (String) algorithmComboBox.getSelectedItem();
         DefaultComboBoxModel<String> modeModel = new DefaultComboBoxModel<>();
@@ -316,7 +310,7 @@ public class TextEncryptionPanel extends JPanel {
         modeComboBox.setModel(modeModel);
         paddingComboBox.setModel(paddingModel);
 
-        // Disable mode and padding selection for algorithms that don't use them
+        // Tắt chọn mode và padding cho các thuật toán không sử dụng chúng
         boolean enableSelection = !selectedAlgorithm.equals("ChaCha20-Poly1305") &&
                 !selectedAlgorithm.equals("RSA") &&
                 !isTraditionalAlgorithm(selectedAlgorithm);
@@ -324,6 +318,7 @@ public class TextEncryptionPanel extends JPanel {
         paddingComboBox.setEnabled(enableSelection);
     }
 
+    // Thực hiện mã hóa/giải mã
     private void performEncryptionDecryption(boolean encrypt) {
         String algorithm = (String) algorithmComboBox.getSelectedItem();
         String mode = (String) modeComboBox.getSelectedItem();
@@ -331,7 +326,6 @@ public class TextEncryptionPanel extends JPanel {
         String inputText = inputTextArea.getText();
         String upperAlgo = algorithm != null ? algorithm.toUpperCase() : "";
 
-        // Xử lý cho thuật toán truyền thống
         if (upperAlgo.equals("CAESAR") || upperAlgo.equals("VIGENERE")
                 || upperAlgo.equals("MONOALPHABETIC") || upperAlgo.equals("AFFINE") || upperAlgo.equals("HILL")) {
             if (loadedTraditionalKey == null || loadedTraditionalKey.isEmpty()) {
@@ -366,7 +360,6 @@ public class TextEncryptionPanel extends JPanel {
         }
         if (loadedKey == null && loadedTraditionalKey == null) {
             if (algorithm != null && (algorithm.equalsIgnoreCase("Caesar") || algorithm.equalsIgnoreCase("Vigenere"))) {
-                // Allow proceeding for traditional
             } else {
                 JOptionPane.showMessageDialog(this, "Vui lòng load file key.",
                         "Lỗi " + (encrypt ? "Mã hóa" : "Giải mã"),
@@ -383,7 +376,6 @@ public class TextEncryptionPanel extends JPanel {
             return;
         }
 
-        // --- Kiểm tra key có đúng thuật toán không ---
         if (loadedKey != null) {
             String keyAlgorithm = loadedKey.getAlgorithm();
             String selectedAlgorithm = (String) algorithmComboBox.getSelectedItem();
@@ -396,7 +388,7 @@ public class TextEncryptionPanel extends JPanel {
             }
         }
 
-        // Key Type Validation (Similar to FileEncryptionPanel)
+        // kiểm tra loại key
         if (upperAlgo.equals("RSA")) {
             if (encrypt && !(loadedKey instanceof java.security.PublicKey)) {
                 JOptionPane.showMessageDialog(this, "Mã hóa RSA yêu cầu khóa Công khai (.pub).", "Lỗi Key",
@@ -408,7 +400,7 @@ public class TextEncryptionPanel extends JPanel {
                         JOptionPane.ERROR_MESSAGE);
                 return;
             }
-        } else if (upperAlgo.equals("AES")) { // Add other symmetric checks
+        } else if (upperAlgo.equals("AES")) {
             if (!(loadedKey instanceof javax.crypto.SecretKey)) {
                 JOptionPane.showMessageDialog(this, "Thao tác " + upperAlgo + " yêu cầu khóa Bí mật (.key).", "Lỗi Key",
                         JOptionPane.ERROR_MESSAGE);
@@ -416,22 +408,18 @@ public class TextEncryptionPanel extends JPanel {
             }
         }
 
-        // --- Perform Operation ---
         try {
-            // --- Determine actual key size from loaded key ---
             int actualKeySize = 0;
             if (loadedKey instanceof java.security.interfaces.RSAKey) {
-                // Get nominal key size for RSA keys
                 actualKeySize = ((java.security.interfaces.RSAKey) loadedKey).getModulus().bitLength();
             } else if (loadedKey instanceof javax.crypto.SecretKey) {
                 String keyAlgorithm = loadedKey.getAlgorithm();
                 if (keyAlgorithm.equals("DESede")) {
-                    // For DESede, check actual key length
                     byte[] encodedKey = loadedKey.getEncoded();
                     if (encodedKey != null) {
-                        if (encodedKey.length == 24) { // 24 bytes = 192 bits raw = 168 bits effective
+                        if (encodedKey.length == 24) {
                             actualKeySize = 168;
-                        } else if (encodedKey.length == 16) { // 16 bytes = 128 bits raw = 112 bits effective
+                        } else if (encodedKey.length == 16) {
                             actualKeySize = 112;
                         } else {
                             throw new IllegalArgumentException(
@@ -440,17 +428,13 @@ public class TextEncryptionPanel extends JPanel {
                         }
                     }
                 } else {
-                    // For other symmetric keys, encoding length * 8 is correct
                     byte[] encodedKey = loadedKey.getEncoded();
                     if (encodedKey != null) {
                         actualKeySize = encodedKey.length * 8;
                     }
                 }
             }
-            // For traditional ciphers, actualKeySize remains 0 or irrelevant
-            // --- End determine actual key size ---
 
-            // Get algorithm instance using determined key size
             EncryptionAlgorithm algoInstance = EncryptionAlgorithmFactory.createAlgorithmForOperation(algorithm, mode,
                     padding, actualKeySize);
 
@@ -466,14 +450,11 @@ public class TextEncryptionPanel extends JPanel {
                         JOptionPane.ERROR_MESSAGE);
                 return;
             }
-            // Gọi mã hóa hiện đại với loadedKey
             if (encrypt) {
                 inputBytes = inputText.getBytes(StandardCharsets.UTF_8);
                 outputBytes = algoInstance.encrypt(inputBytes, loadedKey);
-                // Encode result to Base64 for display/storage in text format
                 outputText = Base64.getEncoder().encodeToString(outputBytes);
             } else {
-                // Assume input text is Base64 encoded ciphertext
                 try {
                     inputBytes = Base64.getDecoder().decode(inputText);
                 } catch (IllegalArgumentException e) {
@@ -482,7 +463,6 @@ public class TextEncryptionPanel extends JPanel {
                     return;
                 }
                 outputBytes = algoInstance.decrypt(inputBytes, loadedKey);
-                // Convert decrypted bytes back to String
                 outputText = new String(outputBytes, StandardCharsets.UTF_8);
             }
 
@@ -504,23 +484,7 @@ public class TextEncryptionPanel extends JPanel {
         }
     }
 
-    // Main method for testing this panel independently
-    public static void main(String[] args) {
-        try {
-            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        JFrame frame = new JFrame("TextEncryptionPanel Test");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.getContentPane().add(new TextEncryptionPanel());
-        frame.setSize(600, 700); // Adjust size for text areas
-        frame.setLocationRelativeTo(null);
-        frame.setVisible(true);
-    }
-
-    // Thêm hàm tiện ích xác định thuật toán truyền thống
+    // Hafm tiện ích xác định thuật toán truyền thống
     private boolean isTraditionalAlgorithm(String algorithm) {
         if (algorithm == null)
             return false;
@@ -529,7 +493,7 @@ public class TextEncryptionPanel extends JPanel {
                 || upper.equals("MONOALPHABETIC") || upper.equals("AFFINE") || upper.equals("HILL");
     }
 
-    // Thêm hàm setAlgorithmType(String type)
+    // Hàm set thuật toán
     public void setAlgorithmType(String type) {
         this.currentAlgorithmType = type;
         DefaultComboBoxModel<String> model = new DefaultComboBoxModel<>();
@@ -559,4 +523,21 @@ public class TextEncryptionPanel extends JPanel {
         algorithmComboBox.setModel(model);
         updateModesAndPaddings();
     }
+
+    // Test độc lập
+    public static void main(String[] args) {
+        try {
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        JFrame frame = new JFrame("TextEncryptionPanel Test");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.getContentPane().add(new TextEncryptionPanel());
+        frame.setSize(600, 700); // Adjust size for text areas
+        frame.setLocationRelativeTo(null);
+        frame.setVisible(true);
+    }
+
 }
