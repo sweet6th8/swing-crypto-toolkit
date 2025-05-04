@@ -47,7 +47,12 @@ public class MainFrame extends JFrame {
         cardLayout = new CardLayout();
         mainContentPanel = new JPanel(cardLayout);
         mainContentPanel.add(new JPanel(), HOME_PANEL);
-        mainContentPanel.add(new KeyGenPanel(), KEY_GEN_PANEL);
+
+        // Create and set up KeyGenPanel
+        KeyGenPanel keyGenPanel = new KeyGenPanel();
+        keyGenPanel.setKeyListPanel(keyListPanel);
+        mainContentPanel.add(keyGenPanel, KEY_GEN_PANEL);
+
         mainContentPanel.add(new FileEncryptionPanel(), FILE_ENC_PANEL);
         mainContentPanel.add(new TextEncryptionPanel(), TEXT_ENC_PANEL);
         mainContentPanel.add(new HashPanel(), HASH_PANEL);
@@ -61,6 +66,10 @@ public class MainFrame extends JFrame {
 
         // Show Home panel initially
         cardLayout.show(mainContentPanel, HOME_PANEL);
+    }
+
+    public KeyListPanel getKeyListPanel() {
+        return keyListPanel;
     }
 
     private void createMenuBar() {

@@ -1,7 +1,7 @@
 package com.atbm.ui.panels;
 
 // Import model classes
-
+import com.atbm.ui.MainFrame;
 import javax.crypto.SecretKey;
 import javax.swing.*;
 import java.awt.*;
@@ -35,6 +35,7 @@ public class KeyGenPanel extends JPanel {
     private JButton exportButton;
     private JFileChooser directoryChooser;
     private JButton loadKeyButton;
+    private KeyListPanel keyListPanel;
 
     // Placeholder for generated key/keypair
     private Object generatedKeyObject = null;
@@ -89,6 +90,10 @@ public class KeyGenPanel extends JPanel {
         // Add Action Listeners
         setupActionListeners();
         updateKeySizeOptions(); // Initial population of key sizes
+    }
+
+    public void setKeyListPanel(KeyListPanel panel) {
+        this.keyListPanel = panel;
     }
 
     private JPanel createAlgorithmSelectionPanel() {
@@ -376,31 +381,25 @@ public class KeyGenPanel extends JPanel {
         }
 
         try {
-            generatedKeyObject = null;
-            int actualKeySize = (keySize != null) ? keySize : 0;
-
-            EncryptionAlgorithm algoInstance = EncryptionAlgorithmFactory.createAlgorithmForKeyGen(algorithm,
-                    actualKeySize);
+            // Get algorithm instance
+            EncryptionAlgorithm algoInstance = EncryptionAlgorithmFactory.createAlgorithm(algorithm);
 
             if (algoInstance instanceof SymmetricEncryption) {
                 SymmetricEncryption symAlgo = (SymmetricEncryption) algoInstance;
-                SecretKey secretKey = symAlgo.generateKey();
-                generatedKeyObject = secretKey;
-                // Display key info (e.g., algorithm, size, and part of the key encoded)
-                String encodedKey = Base64.getEncoder().encodeToString(secretKey.getEncoded());
-                String truncatedKey = encodedKey.length() > 16 ? encodedKey.substring(0, 16) + "..." : encodedKey;
-                generatedKeyField.setText(String.format("%s SecretKey [%d bits]: %s (in memory)",
-                        secretKey.getAlgorithm(), secretKey.getEncoded().length * 8, truncatedKey));
+                SecretKey key = symAlgo.generateKey();
+                generatedKeyObject = key;
+                // Display key info
+                generatedKeyField.setText(String.format("%s Key [%d bits] generated (in memory)",
+                        key.getAlgorithm(), keySize));
                 JOptionPane.showMessageDialog(this, "Khóa đối xứng đã được tạo thành công (trong bộ nhớ)!",
                         "Thành công", JOptionPane.INFORMATION_MESSAGE);
-
             } else if (algoInstance instanceof AsymmetricEncryption) {
                 AsymmetricEncryption asymAlgo = (AsymmetricEncryption) algoInstance;
                 KeyPair keyPair = asymAlgo.generateKeyPair();
                 generatedKeyObject = keyPair;
                 // Display key info
                 generatedKeyField.setText(String.format("%s KeyPair [%d bits] generated (in memory)",
-                        keyPair.getPublic().getAlgorithm(), actualKeySize));
+                        keyPair.getPublic().getAlgorithm(), keySize));
                 JOptionPane.showMessageDialog(this, "Cặp khóa bất đối xứng đã được tạo thành công (trong bộ nhớ)!",
                         "Thành công", JOptionPane.INFORMATION_MESSAGE);
             } else {
@@ -409,6 +408,11 @@ public class KeyGenPanel extends JPanel {
                 generatedKeyObject = null; // Or a placeholder if needed for export?
                 JOptionPane.showMessageDialog(this, "Thuật toán cổ điển được chọn. Không cần tạo khóa.", "Thông báo",
                         JOptionPane.INFORMATION_MESSAGE);
+            }
+
+            // Refresh the key list after successful key generation
+            if (keyListPanel != null) {
+                keyListPanel.refreshKeyList();
             }
 
         } catch (Exception ex) {
@@ -458,6 +462,10 @@ public class KeyGenPanel extends JPanel {
                 try {
                     Files.write(file.toPath(), key.getBytes(StandardCharsets.UTF_8));
                     JOptionPane.showMessageDialog(this, "Đã lưu key truyền thống!");
+                    // Refresh key list after successful save
+                    if (keyListPanel != null) {
+                        keyListPanel.refreshKeyList();
+                    }
                 } catch (Exception ex) {
                     JOptionPane.showMessageDialog(this, "Lỗi khi lưu key: " + ex.getMessage(), "Lỗi",
                             JOptionPane.ERROR_MESSAGE);
@@ -522,6 +530,10 @@ public class KeyGenPanel extends JPanel {
                 KeyManager.saveKey((SecretKey) generatedKeyObject, filePath);
                 JOptionPane.showMessageDialog(this, "Xuất khóa đối xứng thành công tới:\n" + filePath, "Thành công",
                         JOptionPane.INFORMATION_MESSAGE);
+                // Refresh key list after successful save
+                if (keyListPanel != null) {
+                    keyListPanel.refreshKeyList();
+                }
 
             } else if (generatedKeyObject instanceof KeyPair) {
                 String publicKeyPath = dirPath + File.separator + baseName + ".pub";
@@ -544,6 +556,10 @@ public class KeyGenPanel extends JPanel {
                 JOptionPane.showMessageDialog(this,
                         "Xuất cặp khóa bất đối xứng thành công tới: \n" + publicKeyPath + "\n" + privateKeyPath,
                         "Thành công", JOptionPane.INFORMATION_MESSAGE);
+                // Refresh key list after successful save
+                if (keyListPanel != null) {
+                    keyListPanel.refreshKeyList();
+                }
 
             } else {
                 JOptionPane.showMessageDialog(this, "Loại khóa không xác định để xuất.", "Lỗi",

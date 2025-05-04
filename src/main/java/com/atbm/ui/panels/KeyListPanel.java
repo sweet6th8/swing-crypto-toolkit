@@ -13,7 +13,6 @@ public class KeyListPanel extends JPanel {
     private JList<File> keyList;
     private DefaultListModel<File> listModel;
     private final File keyDirectory;
-    private JButton refreshButton;
 
     public KeyListPanel(String keyDirPath) {
         keyDirectory = new File(keyDirPath);
@@ -29,13 +28,6 @@ public class KeyListPanel extends JPanel {
 
         JScrollPane scrollPane = new JScrollPane(keyList);
         add(scrollPane, BorderLayout.CENTER);
-
-        // Add a refresh button at the bottom
-        JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        refreshButton = new JButton("Làm mới");
-        refreshButton.addActionListener(e -> loadKeyFiles());
-        bottomPanel.add(refreshButton);
-        add(bottomPanel, BorderLayout.SOUTH);
 
         loadKeyFiles();
     }
@@ -83,6 +75,10 @@ public class KeyListPanel extends JPanel {
 
     public void addListSelectionListener(ListSelectionListener listener) {
         keyList.addListSelectionListener(listener);
+    }
+
+    public void refreshKeyList() {
+        loadKeyFiles();
     }
 
     // Custom cell renderer to show only the filename
