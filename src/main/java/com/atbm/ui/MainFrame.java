@@ -24,12 +24,10 @@ public class MainFrame extends JFrame {
 
     // Constants for card names
     private static final String HOME_PANEL = "Home";
-    private static final String KEY_GEN_PANEL = "Tạo Key";
+    private static final String KEY_GEN_PANEL = "Tạo khóa";
     private static final String FILE_ENC_PANEL = "File";
     private static final String TEXT_ENC_PANEL = "Văn bản";
     private static final String HASH_PANEL = "Hash";
-    private static final String SIGNATURE_PANEL = "Chữ ký điện tử";
-    private static final String ABOUT_PANEL = "About";
 
     public MainFrame() {
         setTitle("Phần mềm mã hoá/giải mã file"); // Updated title
@@ -48,14 +46,11 @@ public class MainFrame extends JFrame {
         // Create Main Content Panel (Right Panel) using CardLayout
         cardLayout = new CardLayout();
         mainContentPanel = new JPanel(cardLayout);
-        mainContentPanel.add(new JPanel(), HOME_PANEL); // Add placeholder panels for now
-        mainContentPanel.add(new KeyGenPanel(), KEY_GEN_PANEL); // Use actual KeyGenPanel
-        mainContentPanel.add(new FileEncryptionPanel(), FILE_ENC_PANEL); // Use actual FileEncryptionPanel
-        mainContentPanel.add(new TextEncryptionPanel(), TEXT_ENC_PANEL); // Use actual TextEncryptionPanel
+        mainContentPanel.add(new JPanel(), HOME_PANEL);
+        mainContentPanel.add(new KeyGenPanel(), KEY_GEN_PANEL);
+        mainContentPanel.add(new FileEncryptionPanel(), FILE_ENC_PANEL);
+        mainContentPanel.add(new TextEncryptionPanel(), TEXT_ENC_PANEL);
         mainContentPanel.add(new HashPanel(), HASH_PANEL);
-        mainContentPanel.add(new JPanel(), SIGNATURE_PANEL);
-        mainContentPanel.add(new JPanel(), ABOUT_PANEL);
-        // TODO: Replace placeholder JPanels with actual functional panels
 
         // Create Split Pane
         splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, keyListPanel, mainContentPanel);
@@ -78,12 +73,12 @@ public class MainFrame extends JFrame {
         homeMenu.add(homeItem);
         menuBar.add(homeMenu);
 
-        // --- Tạo Key Menu ---
-        JMenu keyMenu = new JMenu(KEY_GEN_PANEL);
-        JMenuItem keyGenItem = new JMenuItem("Mở màn hình tạo khóa");
+        // --- Tạo khóa Menu ---
+        JMenu keyGenMenu = new JMenu(KEY_GEN_PANEL);
+        JMenuItem keyGenItem = new JMenuItem("Mở màn hình Tạo khóa");
         keyGenItem.addActionListener(e -> cardLayout.show(mainContentPanel, KEY_GEN_PANEL));
-        keyMenu.add(keyGenItem);
-        menuBar.add(keyMenu);
+        keyGenMenu.add(keyGenItem);
+        menuBar.add(keyGenMenu);
 
         // --- File Menu ---
         JMenu fileMenu = new JMenu(FILE_ENC_PANEL);
@@ -129,20 +124,6 @@ public class MainFrame extends JFrame {
         hashItem.addActionListener(e -> cardLayout.show(mainContentPanel, HASH_PANEL));
         hashMenu.add(hashItem);
         menuBar.add(hashMenu);
-
-        // --- Chữ ký điện tử Menu ---
-        JMenu signatureMenu = new JMenu(SIGNATURE_PANEL);
-        JMenuItem signatureItem = new JMenuItem("Mở màn hình Chữ ký");
-        signatureItem.addActionListener(e -> cardLayout.show(mainContentPanel, SIGNATURE_PANEL));
-        signatureMenu.add(signatureItem);
-        menuBar.add(signatureMenu);
-
-        // --- About Menu ---
-        JMenu aboutMenu = new JMenu(ABOUT_PANEL);
-        JMenuItem aboutItem = new JMenuItem("Thông tin");
-        aboutItem.addActionListener(e -> cardLayout.show(mainContentPanel, ABOUT_PANEL));
-        aboutMenu.add(aboutItem);
-        menuBar.add(aboutMenu);
     }
 
     public static void main(String[] args) {

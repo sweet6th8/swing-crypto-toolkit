@@ -1,7 +1,8 @@
 package com.atbm.core.encryption.symmetric;
 
+// Class này mã hóa và giải mã dữ liệu sử dụng Blowfish
 public class BlowfishEncryption extends SymmetricEncryption {
-    // Blowfish supports key sizes from 32 to 448 bits
+
     public static final int[] SUPPORTED_KEY_SIZES = { 32, 64, 96, 128, 160, 192, 224, 256, 288, 320, 352, 384, 416,
             448 };
     public static final int DEFAULT_KEY_SIZE = 128;

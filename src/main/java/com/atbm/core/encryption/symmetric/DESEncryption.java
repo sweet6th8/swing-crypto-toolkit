@@ -1,11 +1,7 @@
 package com.atbm.core.encryption.symmetric;
 
-import javax.crypto.SecretKey;
-import java.security.Key;
-
 public class DESEncryption extends SymmetricEncryption {
 
-    // DES key size is fixed at 56 bits (64 bits with parity)
     public static final int KEY_SIZE = 56;
 
     public DESEncryption(String mode, String padding, int keySize) {

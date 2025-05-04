@@ -31,7 +31,7 @@ public abstract class SymmetricEncryption implements EncryptionAlgorithm {
         }
         Cipher cipher = Cipher.getInstance(transformation);
 
-        // Handle manual padding if NoPadding is selected
+        // Xử lý padding
         byte[] dataToEncrypt = data;
         if (padding.equals("NoPadding") && !algorithm.equals("ChaCha20-Poly1305")) {
             int blockSize = cipher.getBlockSize();
@@ -39,7 +39,7 @@ public abstract class SymmetricEncryption implements EncryptionAlgorithm {
             if (paddingLength > 0 && paddingLength < blockSize) {
                 dataToEncrypt = new byte[data.length + paddingLength];
                 System.arraycopy(data, 0, dataToEncrypt, 0, data.length);
-                // Fill remaining bytes with zeros
+                // Điền các byte còn lại bằng 0
                 for (int i = data.length; i < dataToEncrypt.length; i++) {
                     dataToEncrypt[i] = 0;
                 }

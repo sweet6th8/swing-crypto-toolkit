@@ -1,11 +1,7 @@
 package com.atbm.core.encryption.symmetric;
 
-import javax.crypto.SecretKey;
-import java.security.Key;
-
 public class DESedeEncryption extends SymmetricEncryption {
 
-    // DESede key sizes: 112 (effective), 168 (actual) bits
     public static final int[] SUPPORTED_KEY_SIZES = { 112, 168 };
 
     public DESedeEncryption(String mode, String padding, int keySize) {
@@ -32,6 +28,4 @@ public class DESedeEncryption extends SymmetricEncryption {
         return "DESede";
     }
 
-    // encrypt and decrypt methods are inherited from SymmetricEncryption
-    // generateKey method is inherited from SymmetricEncryption
 }

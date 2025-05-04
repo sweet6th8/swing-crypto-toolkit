@@ -1,11 +1,8 @@
 package com.atbm.core.encryption.symmetric;
 
-import javax.crypto.SecretKey;
-import java.security.Key;
-
+// Class này mã hóa và giải mã dữ liệu sử dụng AES
 public class AESEncryption extends SymmetricEncryption {
 
-    // AES key sizes: 128, 192, 256 bits
     public static final int[] SUPPORTED_KEY_SIZES = { 128, 192, 256 };
 
     public AESEncryption(String mode, String padding, int keySize) {
@@ -32,6 +29,4 @@ public class AESEncryption extends SymmetricEncryption {
         return "AES";
     }
 
-    // encrypt and decrypt methods are inherited from SymmetricEncryption
-    // generateKey method is inherited from SymmetricEncryption
 }

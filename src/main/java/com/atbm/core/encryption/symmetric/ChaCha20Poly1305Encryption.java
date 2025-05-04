@@ -5,7 +5,6 @@ import java.security.Key;
 
 public class ChaCha20Poly1305Encryption extends SymmetricEncryption {
 
-    // ChaCha20-Poly1305 key size is fixed at 256 bits
     public static final int KEY_SIZE = 256;
 
     public ChaCha20Poly1305Encryption() {
@@ -27,6 +26,4 @@ public class ChaCha20Poly1305Encryption extends SymmetricEncryption {
         return new String[] { "NoPadding" };
     }
 
-    // encrypt and decrypt methods are inherited from SymmetricEncryption
-    // generateKey method is inherited from SymmetricEncryption
 }

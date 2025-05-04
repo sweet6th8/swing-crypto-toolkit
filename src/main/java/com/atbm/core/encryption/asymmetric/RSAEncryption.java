@@ -104,7 +104,6 @@ public class RSAEncryption extends AsymmetricEncryption {
     // Trả về các padding hỗ trợ RSA
     @Override
     public String[] getSupportedPaddings() {
-        // Common paddings for RSA
         return new String[] { "PKCS1Padding", "OAEPWithSHA-1AndMGF1Padding", "OAEPWithSHA-256AndMGF1Padding",
                 "NoPadding" };
     }
