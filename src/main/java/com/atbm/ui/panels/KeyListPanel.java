@@ -8,6 +8,7 @@ import java.io.FilenameFilter;
 import java.util.Arrays;
 import java.util.Comparator;
 
+// Class này là panel hiển thị danh sách khóa
 public class KeyListPanel extends JPanel {
 
     private JList<File> keyList;
@@ -24,7 +25,7 @@ public class KeyListPanel extends JPanel {
         listModel = new DefaultListModel<>();
         keyList = new JList<>(listModel);
         keyList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        keyList.setCellRenderer(new KeyFileRenderer()); // Custom renderer for better display
+        keyList.setCellRenderer(new KeyFileRenderer());
 
         JScrollPane scrollPane = new JScrollPane(keyList);
         add(scrollPane, BorderLayout.CENTER);
@@ -32,24 +33,23 @@ public class KeyListPanel extends JPanel {
         loadKeyFiles();
     }
 
+    // Đảm bảo thư mục khóa tồn tại
     private void ensureKeyDirectoryExists() {
         if (!keyDirectory.exists()) {
             if (keyDirectory.mkdirs()) {
                 System.out.println("Created key directory: " + keyDirectory.getAbsolutePath());
             } else {
                 System.err.println("Failed to create key directory: " + keyDirectory.getAbsolutePath());
-                // Handle error appropriately, maybe show a dialog
             }
         } else if (!keyDirectory.isDirectory()) {
             System.err.println("Key path exists but is not a directory: " + keyDirectory.getAbsolutePath());
-            // Handle error
         }
     }
 
+    // Load file key
     public void loadKeyFiles() {
         listModel.clear();
         if (keyDirectory.isDirectory()) {
-            // Filter for .key, .pub, .pri files
             File[] files = keyDirectory.listFiles(new FilenameFilter() {
                 @Override
                 public boolean accept(File dir, String name) {
@@ -81,31 +81,21 @@ public class KeyListPanel extends JPanel {
         loadKeyFiles();
     }
 
-    // Custom cell renderer to show only the filename
+    // Hiển thị tên file
     private static class KeyFileRenderer extends DefaultListCellRenderer {
         @Override
         public Component getListCellRendererComponent(JList<?> list, Object value,
                 int index, boolean isSelected,
                 boolean cellHasFocus) {
-            // Call superclass to get default formatting
             Component c = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
             if (value instanceof File) {
-                setText(((File) value).getName()); // Display only the file name
-                // Set icon based on file type (optional)
-                String name = ((File) value).getName().toLowerCase();
-                if (name.endsWith(".key")) {
-                    // setIcon(your_symmetric_key_icon);
-                } else if (name.endsWith(".pub")) {
-                    // setIcon(your_public_key_icon);
-                } else if (name.endsWith(".pri")) {
-                    // setIcon(your_private_key_icon);
-                }
+                setText(((File) value).getName());
             }
             return c;
         }
     }
 
-    // Main method for testing this panel independently
+    // Test độc lập
     public static void main(String[] args) {
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
