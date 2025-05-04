@@ -14,18 +14,18 @@ public class VigenereCipher extends TraditionalEncryption {
 
     public void setKeyword(String keyword) {
         if (keyword == null || keyword.isEmpty()) {
-            throw new IllegalArgumentException("Keyword cannot be null or empty.");
+            throw new IllegalArgumentException("Từ khóa không được để trống");
         }
         this.keyword = keyword.toUpperCase().replaceAll("[^A-Z]", "");
         if (this.keyword.isEmpty()) {
-            throw new IllegalArgumentException("Keyword must contain at least one letter.");
+            throw new IllegalArgumentException("Từ khóa phải chứa ít nhất một chữ cái");
         }
     }
 
     @Override
     public byte[] encrypt(byte[] data, Key key) throws Exception {
         if (keyword == null || keyword.isEmpty()) {
-            throw new IllegalStateException("Keyword must be set before encryption");
+            throw new IllegalStateException("Cần đặt từ khóa trước khi mã hóa");
         }
         return process(data, true);
     }
@@ -33,7 +33,7 @@ public class VigenereCipher extends TraditionalEncryption {
     @Override
     public byte[] decrypt(byte[] encryptedData, Key key) throws Exception {
         if (keyword == null || keyword.isEmpty()) {
-            throw new IllegalStateException("Keyword must be set before decryption");
+            throw new IllegalStateException("Cần đặt từ khóa trước khi giải mã");
         }
         return process(encryptedData, false);
     }
@@ -43,7 +43,7 @@ public class VigenereCipher extends TraditionalEncryption {
             return input;
         }
         if (keyword == null || keyword.isEmpty()) {
-            throw new IllegalStateException("Keyword must be set before processing");
+            throw new IllegalStateException("Cần đặt từ khóa trước khi xử lý");
         }
 
         byte[] output = new byte[input.length];

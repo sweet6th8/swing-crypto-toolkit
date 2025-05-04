@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.security.MessageDigest;
 
+// Class này cung cấp các phương thức để tính toán hash của văn bản và tệp
 public class HashAlgorithm {
     public static String hashText(String text, String algorithm) throws Exception {
         MessageDigest md = MessageDigest.getInstance(algorithm);

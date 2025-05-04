@@ -10,15 +10,12 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
 // Class này chứa các phương thức lưu và tải key
-
 public class KeyManager {
 
-    // --- Saving Keys ---
-
+    // Lưu key vào file
     public static void saveKey(Key key, String filePath) throws IOException {
         try (FileOutputStream fos = new FileOutputStream(filePath)) {
             byte[] keyBytes = key.getEncoded();
-            // Encode to Base64 and write
             String encodedKey = Base64.getEncoder().encodeToString(keyBytes);
             fos.write(encodedKey.getBytes());
         }
@@ -29,11 +26,7 @@ public class KeyManager {
         saveKey(keyPair.getPrivate(), privateKeyPath);
     }
 
-    // --- Loading Keys ---
-
-    /**
-     * Loads raw key bytes (Base64 decoded) from a file.
-     */
+    // Tải key từ file
     private static byte[] loadRawKeyBytes(String filePath) throws IOException {
         StringBuilder content = new StringBuilder();
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
@@ -42,30 +35,16 @@ public class KeyManager {
                 content.append(line);
             }
         }
-        // Decode Base64
         return Base64.getDecoder().decode(content.toString());
     }
 
-    /**
-     * Loads a SecretKey from a file (assuming AES, DESede, etc.).
-     *
-     * @param filePath  Path to the key file.
-     * @param algorithm The algorithm name (e.g., "AES", "DESede") to associate with
-     *                  the key.
-     * @return The loaded SecretKey.
-     */
+    // Tải key bí mật từ file
     public static SecretKey loadSecretKey(String filePath, String algorithm) throws IOException {
         byte[] decodedKey = loadRawKeyBytes(filePath);
         return new SecretKeySpec(decodedKey, 0, decodedKey.length, algorithm);
     }
 
-    /**
-     * Loads a PublicKey from a file (assuming RSA, DSA, etc.).
-     *
-     * @param filePath  Path to the public key file (.pub).
-     * @param algorithm The algorithm name (e.g., "RSA", "DSA").
-     * @return The loaded PublicKey.
-     */
+    // Tải public key
     public static PublicKey loadPublicKey(String filePath, String algorithm)
             throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
         byte[] keyBytes = loadRawKeyBytes(filePath);
@@ -74,13 +53,7 @@ public class KeyManager {
         return keyFactory.generatePublic(spec);
     }
 
-    /**
-     * Loads a PrivateKey from a file (assuming RSA, DSA, etc.).
-     *
-     * @param filePath  Path to the private key file (.pri).
-     * @param algorithm The algorithm name (e.g., "RSA", "DSA").
-     * @return The loaded PrivateKey.
-     */
+    // tải private key
     public static PrivateKey loadPrivateKey(String filePath, String algorithm)
             throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
         byte[] keyBytes = loadRawKeyBytes(filePath);
@@ -89,19 +62,7 @@ public class KeyManager {
         return keyFactory.generatePrivate(spec);
     }
 
-    /**
-     * Tries to load a Key object based on file extension and algorithm.
-     * For asymmetric decryption, it loads the private key.
-     * For asymmetric encryption, it loads the public key.
-     * For symmetric, it loads the secret key.
-     *
-     * @param filePath     Path to the key file (.key, .pub, .pri).
-     * @param algorithm    The cryptographic algorithm (e.g., "AES", "RSA").
-     * @param isEncrypting True if loading the key for encryption, false for
-     *                     decryption.
-     * @return The loaded Key object (SecretKey, PublicKey, or PrivateKey).
-     * @throws Exception If loading fails or key type is inappropriate.
-     */
+    // load key cho từng loại
     public static Key loadKeyForOperation(String filePath, String algorithm, boolean isEncrypting) throws Exception {
         String lowerPath = filePath.toLowerCase();
         String upperAlgo = algorithm.toUpperCase();
@@ -110,31 +71,27 @@ public class KeyManager {
                 || upperAlgo.equals("CHACHA20-POLY1305") || upperAlgo.equals("BLOWFISH")
                 || upperAlgo.equals("TWOFISH") || upperAlgo.equals("CAMELLIA") || upperAlgo.equals("CAST5")
                 || upperAlgo.equals("RC5")) {
-            // Symmetric: Load SecretKey
             if (!lowerPath.endsWith(".key")) {
-                throw new IllegalArgumentException("Expected a .key file for symmetric algorithm " + algorithm);
+                throw new IllegalArgumentException("File key không đúng định dạng cho thuật toán " + algorithm);
             }
             return loadSecretKey(filePath, algorithm);
         } else if (upperAlgo.equals("RSA")) {
-            // Asymmetric: Load Public for Encrypt, Private for Decrypt
             if (isEncrypting) {
                 if (!lowerPath.endsWith(".pub")) {
-                    throw new IllegalArgumentException("Expected a .pub file for RSA encryption.");
+                    throw new IllegalArgumentException("Cần file .pub để mã hóa RSA");
                 }
                 return loadPublicKey(filePath, algorithm);
             } else {
                 if (!lowerPath.endsWith(".pri")) {
-                    throw new IllegalArgumentException("Expected a .pri file for RSA decryption.");
+                    throw new IllegalArgumentException("Cần file .pri để giải mã RSA");
                 }
                 return loadPrivateKey(filePath, algorithm);
             }
         } else if (upperAlgo.equals("CAESAR") || upperAlgo.equals("VIGENERE")
                 || upperAlgo.equals("MONOALPHABETIC") || upperAlgo.equals("AFFINE") || upperAlgo.equals("HILL")) {
-            // Traditional: Key file not used in the same way, return null or handle
-            // differently
             return null;
         } else {
-            throw new NoSuchAlgorithmException("Unsupported algorithm for key loading: " + algorithm);
+            throw new NoSuchAlgorithmException("Không hỗ trợ thuật toán: " + algorithm);
         }
     }
 
