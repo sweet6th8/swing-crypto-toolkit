@@ -36,7 +36,7 @@ public class MainFrame extends JFrame {
 
         setTitle("Phần mềm mã hoá/giải mã dữ liệu - LangNguyen");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(1200, 800); // Increased window size
+        setSize(1200, 800);
         setLocationRelativeTo(null);
 
         // Tạo menu bar
@@ -45,7 +45,7 @@ public class MainFrame extends JFrame {
 
         // Tạo panel danh sách khóa (Left Panel)
         keyListPanel = new KeyListPanel("./keys");
-        keyListPanel.setPreferredSize(new Dimension(300, 0)); // Increased width
+        keyListPanel.setPreferredSize(new Dimension(300, 0));
 
         // Tạo panel nội dung chính (Right Panel) sử dụng CardLayout
         cardLayout = new CardLayout();
@@ -63,7 +63,7 @@ public class MainFrame extends JFrame {
 
         // Tạo Split Pane
         splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, keyListPanel, mainContentPanel);
-        splitPane.setDividerLocation(300); // Increased divider location
+        splitPane.setDividerLocation(300);
         splitPane.setOneTouchExpandable(true);
 
         add(splitPane, BorderLayout.CENTER);

@@ -115,7 +115,7 @@ public class FileEncryptionPanel extends JPanel implements DropTargetListener {
         panel.setBorder(BorderFactory.createTitledBorder("Chọn File Đầu Vào"));
 
         dragDropLabel = new JLabel(
-                "<html><div style='text-align: center;'>Kéo và thả file vào đây!<br/> hoặc</div></html>",
+                "<html><div style='text-align: center;'>Kéo và thả file vào đây!<br/> </div></html>",
                 SwingConstants.CENTER);
         dragDropLabel.setFont(dragDropLabel.getFont().deriveFont(Font.ITALIC, 16f));
         dragDropLabel.setPreferredSize(new Dimension(300, 100)); // Give it a size

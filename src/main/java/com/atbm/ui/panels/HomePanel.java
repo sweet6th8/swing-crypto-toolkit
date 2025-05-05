@@ -9,14 +9,12 @@ public class HomePanel extends JPanel {
                 setLayout(new BorderLayout());
                 setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-                // Create main content panel with GridBagLayout
                 JPanel contentPanel = new JPanel(new GridBagLayout());
                 GridBagConstraints gbc = new GridBagConstraints();
                 gbc.insets = StyleConstants.DEFAULT_INSETS;
                 gbc.fill = GridBagConstraints.HORIZONTAL;
                 gbc.weightx = 1.0;
 
-                // Add welcome title
                 gbc.gridx = 0;
                 gbc.gridy = 0;
                 JLabel welcomeLabel = new JLabel("Chào mừng đến với Phần mềm Mã hóa/Giải mã");
@@ -24,7 +22,6 @@ public class HomePanel extends JPanel {
                 welcomeLabel.setHorizontalAlignment(SwingConstants.CENTER);
                 contentPanel.add(welcomeLabel, gbc);
 
-                // Add description
                 gbc.gridy++;
                 JTextArea description = new JTextArea(
                                 "Phần mềm này cung cấp các công cụ mạnh mẽ để mã hóa và giải mã dữ liệu " +
@@ -61,7 +58,6 @@ public class HomePanel extends JPanel {
 
                 contentPanel.add(instructionsPanel, gbc);
 
-                // Add version info
                 gbc.gridy++;
                 gbc.anchor = GridBagConstraints.SOUTH;
                 JLabel versionLabel = new JLabel("Phiên bản 1.0.0");

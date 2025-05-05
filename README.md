@@ -1,16 +1,22 @@
 # Hướng dẫn sử dụng
 
+## Yêu cầu hệ thống
+
+- JDK 11 trở lên
+- Maven 3.6 trở lên
+- IDE hỗ trợ Java (IntelliJ IDEA, Eclipse, VS Code)
+
 ## Cài đặt
 
 1. Clone repository về máy local
-2. Cài đặt các dependencies cần thiết
-3. Chạy ứng dụng
+2. Mở project bằng IDE
+3. Cài đặt dependencies thông qua Maven
+4. Build project
 
 ## Cách sử dụng
 
-1. Mở terminal và chạy lệnh để khởi động ứng dụng
-2. Truy cập ứng dụng qua trình duyệt web
-3. Thực hiện các thao tác theo hướng dẫn trên giao diện
+1. Chạy ứng dụng từ IDE hoặc qua command line
+2. Thực hiện các thao tác theo hướng dẫn trên giao diện
 
 ## Các tính năng chính
 
@@ -20,8 +26,8 @@
 
 ## Lưu ý
 
-- Đảm bảo đã cài đặt đầy đủ các dependencies trước khi sử dụng
-- Kiểm tra phiên bản Python/Node.js phù hợp
+- Đảm bảo đã cài đặt đầy đủ JDK và Maven
+- Kiểm tra phiên bản Java phù hợp
 - Đọc kỹ các thông báo lỗi nếu có
 
 ## Hỗ trợ

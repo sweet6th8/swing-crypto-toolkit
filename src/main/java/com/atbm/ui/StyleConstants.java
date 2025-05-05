@@ -28,7 +28,6 @@ public class StyleConstants {
         UIManager.put("List.font", TEXT_FONT);
         UIManager.put("Table.font", TEXT_FONT);
 
-        // Set default border for titled borders
         UIManager.put("TitledBorder.titleColor", Color.BLACK);
         UIManager.put("TitledBorder.titleFont", TITLE_FONT);
     }
