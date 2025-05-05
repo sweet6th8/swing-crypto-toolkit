@@ -1,5 +1,6 @@
 package com.atbm.ui.panels;
 
+import com.atbm.ui.StyleConstants;
 import javax.swing.*;
 import javax.swing.event.ListSelectionListener;
 import java.awt.*;
@@ -20,14 +21,19 @@ public class KeyListPanel extends JPanel {
         ensureKeyDirectoryExists();
 
         setLayout(new BorderLayout());
-        setBorder(BorderFactory.createTitledBorder("Danh sách khóa"));
+        setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createTitledBorder("Danh sách khóa"),
+                BorderFactory.createEmptyBorder(10, 10, 10, 10)));
 
         listModel = new DefaultListModel<>();
         keyList = new JList<>(listModel);
         keyList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         keyList.setCellRenderer(new KeyFileRenderer());
+        keyList.setFont(StyleConstants.TEXT_FONT);
+        keyList.setFixedCellHeight(35); // Increased row height
 
         JScrollPane scrollPane = new JScrollPane(keyList);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
         add(scrollPane, BorderLayout.CENTER);
 
         loadKeyFiles();

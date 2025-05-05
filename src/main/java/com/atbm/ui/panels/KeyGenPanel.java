@@ -1,5 +1,6 @@
 package com.atbm.ui.panels;
 
+import com.atbm.ui.StyleConstants;
 import javax.crypto.SecretKey;
 import javax.swing.*;
 import java.awt.*;
@@ -40,20 +41,24 @@ public class KeyGenPanel extends JPanel {
     public KeyGenPanel() {
         setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.insets = StyleConstants.DEFAULT_INSETS;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.anchor = GridBagConstraints.WEST;
 
         gbc.gridx = 0;
         gbc.gridy = 0;
         gbc.gridwidth = 2;
-        add(new JLabel("Key generate:"), gbc);
+        JLabel titleLabel = new JLabel("Key generate:");
+        titleLabel.setFont(StyleConstants.TITLE_FONT);
+        add(titleLabel, gbc);
 
         gbc.gridy++;
         gbc.gridwidth = 1;
         gbc.weightx = 1.0;
         generatedKeyField = new JTextField(40);
+        generatedKeyField.setFont(StyleConstants.TEXT_FONT);
         generatedKeyField.setEditable(false);
+        generatedKeyField.setPreferredSize(StyleConstants.TEXT_FIELD_SIZE);
         add(generatedKeyField, gbc);
 
         gbc.gridx = 1;
@@ -67,6 +72,8 @@ public class KeyGenPanel extends JPanel {
 
         gbc.gridy++;
         generateButton = new JButton("Tạo khóa!");
+        generateButton.setFont(StyleConstants.BUTTON_FONT);
+        generateButton.setPreferredSize(StyleConstants.BUTTON_SIZE);
         gbc.anchor = GridBagConstraints.CENTER;
         gbc.fill = GridBagConstraints.NONE;
         gbc.weightx = 0;
@@ -90,29 +97,39 @@ public class KeyGenPanel extends JPanel {
 
     private JPanel createAlgorithmSelectionPanel() {
         JPanel panel = new JPanel(new GridBagLayout());
-        panel.setBorder(BorderFactory.createTitledBorder("Lựa chọn thuật toán"));
+        panel.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createTitledBorder("Lựa chọn thuật toán"),
+                BorderFactory.createEmptyBorder(10, 10, 10, 10)));
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.insets = StyleConstants.DEFAULT_INSETS;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.anchor = GridBagConstraints.WEST;
 
         gbc.gridx = 0;
         gbc.gridy = 0;
-        panel.add(new JLabel("Thuật toán!"), gbc);
+        JLabel algoLabel = new JLabel("Thuật toán!");
+        algoLabel.setFont(StyleConstants.LABEL_FONT);
+        panel.add(algoLabel, gbc);
 
         gbc.gridx = 1;
         gbc.weightx = 1.0;
         initializeAlgorithmComboBox();
+        algorithmComboBox.setFont(StyleConstants.TEXT_FONT);
+        algorithmComboBox.setPreferredSize(StyleConstants.COMBO_BOX_SIZE);
         panel.add(algorithmComboBox, gbc);
 
         gbc.gridx = 0;
         gbc.gridy = 1;
         gbc.weightx = 0;
-        panel.add(new JLabel("Kích thước khóa!"), gbc);
+        JLabel sizeLabel = new JLabel("Kích thước khóa!");
+        sizeLabel.setFont(StyleConstants.LABEL_FONT);
+        panel.add(sizeLabel, gbc);
 
         gbc.gridx = 1;
         gbc.weightx = 1.0;
         keySizeComboBox = new JComboBox<>();
+        keySizeComboBox.setFont(StyleConstants.TEXT_FONT);
+        keySizeComboBox.setPreferredSize(StyleConstants.COMBO_BOX_SIZE);
         panel.add(keySizeComboBox, gbc);
 
         return panel;
@@ -220,13 +237,17 @@ public class KeyGenPanel extends JPanel {
     // Tạo panel cho việc xuất kết quả
     private JPanel createExportPanel() {
         JPanel panel = new JPanel(new GridBagLayout());
-        panel.setBorder(BorderFactory.createTitledBorder("Xuất kết quả"));
+        panel.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createTitledBorder("Xuất kết quả"),
+                BorderFactory.createEmptyBorder(10, 10, 10, 10)));
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.insets = StyleConstants.DEFAULT_INSETS;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.anchor = GridBagConstraints.WEST;
 
         JButton chooseDirButton = new JButton("Chọn thư mục");
+        chooseDirButton.setFont(StyleConstants.BUTTON_FONT);
+        chooseDirButton.setPreferredSize(StyleConstants.BUTTON_SIZE);
         gbc.gridx = 0;
         gbc.gridy = 0;
         panel.add(chooseDirButton, gbc);
@@ -234,7 +255,9 @@ public class KeyGenPanel extends JPanel {
         gbc.gridx = 1;
         gbc.gridwidth = 3;
         gbc.weightx = 1.0;
-        outputDirField = new JTextField("./keys"); // mặc định
+        outputDirField = new JTextField("./keys");
+        outputDirField.setFont(StyleConstants.TEXT_FONT);
+        outputDirField.setPreferredSize(StyleConstants.TEXT_FIELD_SIZE);
         panel.add(outputDirField, gbc);
 
         gbc.gridx = 1;
@@ -242,16 +265,21 @@ public class KeyGenPanel extends JPanel {
         gbc.gridwidth = 1;
         gbc.weightx = 0.8;
         baseFileNameField = new JTextField();
+        baseFileNameField.setFont(StyleConstants.TEXT_FONT);
+        baseFileNameField.setPreferredSize(StyleConstants.TEXT_FIELD_SIZE);
         panel.add(baseFileNameField, gbc);
         updateBaseFileName();
 
         gbc.gridx = 2;
         gbc.weightx = 0;
-        panel.add(new JLabel(".keys"), gbc);
+        JLabel extensionLabel = new JLabel(".keys");
+        extensionLabel.setFont(StyleConstants.LABEL_FONT);
+        panel.add(extensionLabel, gbc);
 
         gbc.gridx = 3;
-        gbc.weightx = 0;
-        exportButton = new JButton("Xuất file");
+        exportButton = new JButton("Xuất khóa");
+        exportButton.setFont(StyleConstants.BUTTON_FONT);
+        exportButton.setPreferredSize(StyleConstants.BUTTON_SIZE);
         panel.add(exportButton, gbc);
 
         directoryChooser = new JFileChooser();

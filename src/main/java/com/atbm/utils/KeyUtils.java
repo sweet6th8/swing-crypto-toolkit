@@ -9,6 +9,7 @@ import java.util.Base64;
 
 public class KeyUtils {
 
+    // Phương thức tạo key cho các thuật toán đối xứng
     public static String generateSymmetricKey(String algorithm, int keySize) {
         try {
             KeyGenerator keyGen;
@@ -29,6 +30,7 @@ public class KeyUtils {
         }
     }
 
+    // Phương thức tạo key cho các thuật toán bất đối xứng
     public static String generateAsymmetricKeyPair(String algorithm, int keySize) {
         try {
             KeyPairGenerator keyPairGen = KeyPairGenerator.getInstance(algorithm);
@@ -48,6 +50,7 @@ public class KeyUtils {
         }
     }
 
+    // Phương thức tạo key cho các thuật toán truyền thống
     public static String generateTraditionalKey(String algorithm) {
         SecureRandom rand = new SecureRandom();
         switch (algorithm) {

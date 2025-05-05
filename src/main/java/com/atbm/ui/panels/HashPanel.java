@@ -105,7 +105,7 @@ public class HashPanel extends JPanel implements DropTargetListener {
         fileDropPanel.setPreferredSize(new Dimension(400, 180));
         fileDropPanel.setMaximumSize(new Dimension(600, 200));
         fileDropPanel.setBorder(BorderFactory.createDashedBorder(Color.GRAY, 3, 6));
-        fileDropLabel = new JLabel("Drop file into here!", SwingConstants.CENTER);
+        fileDropLabel = new JLabel("Kéo thả file vào đây!", SwingConstants.CENTER);
         fileDropLabel.setFont(new Font(Font.SERIF, Font.ITALIC, 22));
         fileDropPanel.add(fileDropLabel, BorderLayout.CENTER);
         new DropTarget(fileDropPanel, DnDConstants.ACTION_COPY_OR_MOVE, this, true);

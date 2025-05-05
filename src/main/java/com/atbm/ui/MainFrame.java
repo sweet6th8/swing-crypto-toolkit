@@ -11,6 +11,7 @@ import java.security.Security;
 import javax.swing.*;
 import java.awt.*;
 
+// Class MainFrame là class chính của tool, nó chứa các panel và menu bar
 public class MainFrame extends JFrame {
     static {
         Security.addProvider(new BouncyCastleProvider());
@@ -18,11 +19,10 @@ public class MainFrame extends JFrame {
 
     private JSplitPane splitPane;
     private KeyListPanel keyListPanel;
-    private JPanel mainContentPanel; // Panel using CardLayout
+    private JPanel mainContentPanel;
     private CardLayout cardLayout;
     private JMenuBar menuBar;
 
-    // Constants for card names
     private static final String HOME_PANEL = "Home";
     private static final String KEY_GEN_PANEL = "Tạo khóa";
     private static final String FILE_ENC_PANEL = "File";
@@ -30,25 +30,28 @@ public class MainFrame extends JFrame {
     private static final String HASH_PANEL = "Hash";
 
     public MainFrame() {
-        setTitle("Phần mềm mã hoá/giải mã file"); // Updated title
+        // Apply default styles
+        StyleConstants.applyDefaultStyles();
+
+        setTitle("Phần mềm mã hoá/giải mã file");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(1000, 700); // Adjusted size
+        setSize(1200, 800); // Increased window size
         setLocationRelativeTo(null);
 
-        // Create Menu Bar
+        // Tạo menu bar
         createMenuBar();
         setJMenuBar(menuBar);
 
-        // Create Key List Panel (Left Panel)
+        // Tạo panel danh sách khóa (Left Panel)
         keyListPanel = new KeyListPanel("./keys");
-        keyListPanel.setPreferredSize(new Dimension(250, 0));
+        keyListPanel.setPreferredSize(new Dimension(300, 0)); // Increased width
 
-        // Create Main Content Panel (Right Panel) using CardLayout
+        // Tạo panel nội dung chính (Right Panel) sử dụng CardLayout
         cardLayout = new CardLayout();
         mainContentPanel = new JPanel(cardLayout);
         mainContentPanel.add(new JPanel(), HOME_PANEL);
 
-        // Create and set up KeyGenPanel
+        // Tạo và thiết lập KeyGenPanel
         KeyGenPanel keyGenPanel = new KeyGenPanel();
         keyGenPanel.setKeyListPanel(keyListPanel);
         mainContentPanel.add(keyGenPanel, KEY_GEN_PANEL);
@@ -57,14 +60,13 @@ public class MainFrame extends JFrame {
         mainContentPanel.add(new TextEncryptionPanel(), TEXT_ENC_PANEL);
         mainContentPanel.add(new HashPanel(), HASH_PANEL);
 
-        // Create Split Pane
+        // Tạo Split Pane
         splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, keyListPanel, mainContentPanel);
-        splitPane.setDividerLocation(250);
+        splitPane.setDividerLocation(300); // Increased divider location
         splitPane.setOneTouchExpandable(true);
 
         add(splitPane, BorderLayout.CENTER);
 
-        // Show Home panel initially
         cardLayout.show(mainContentPanel, HOME_PANEL);
     }
 
@@ -75,21 +77,18 @@ public class MainFrame extends JFrame {
     private void createMenuBar() {
         menuBar = new JMenuBar();
 
-        // --- File Menu --- (Example, adjust based on screenshot) ---
         JMenu homeMenu = new JMenu(HOME_PANEL);
         JMenuItem homeItem = new JMenuItem("Show Home");
         homeItem.addActionListener(e -> cardLayout.show(mainContentPanel, HOME_PANEL));
         homeMenu.add(homeItem);
         menuBar.add(homeMenu);
 
-        // --- Tạo khóa Menu ---
         JMenu keyGenMenu = new JMenu(KEY_GEN_PANEL);
         JMenuItem keyGenItem = new JMenuItem("Mở màn hình Tạo khóa");
         keyGenItem.addActionListener(e -> cardLayout.show(mainContentPanel, KEY_GEN_PANEL));
         keyGenMenu.add(keyGenItem);
         menuBar.add(keyGenMenu);
 
-        // --- File Menu ---
         JMenu fileMenu = new JMenu(FILE_ENC_PANEL);
         JMenuItem fileSymItem = new JMenuItem("Đối xứng");
         fileSymItem.addActionListener(e -> {
@@ -105,7 +104,6 @@ public class MainFrame extends JFrame {
         fileMenu.add(fileAsymItem);
         menuBar.add(fileMenu);
 
-        // --- Văn bản Menu ---
         JMenu textMenu = new JMenu(TEXT_ENC_PANEL);
         JMenuItem textSymItem = new JMenuItem("Đối xứng");
         textSymItem.addActionListener(e -> {
@@ -136,7 +134,6 @@ public class MainFrame extends JFrame {
     }
 
     public static void main(String[] args) {
-        // Set Look and Feel (Optional, for better appearance)
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (Exception e) {

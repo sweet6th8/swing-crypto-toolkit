@@ -7,13 +7,9 @@ import java.nio.file.StandardOpenOption;
 import javax.crypto.Cipher;
 import javax.crypto.CipherInputStream;
 import javax.crypto.CipherOutputStream;
-import java.security.Key;
-import javax.crypto.spec.IvParameterSpec;
-import java.security.SecureRandom;
 import java.util.function.Consumer;
 
 // Class này chứa các phương thức để đảm bảo tồn tại thư mục keys và đọc/ghi file
-
 public class FileUtils {
     // Kích thước buffer mặc định là 8MB cho streaming
     private static final int DEFAULT_BUFFER_SIZE = 8 * 1024 * 1024; // 8MB
@@ -91,10 +87,8 @@ public class FileUtils {
         }
 
         if (data.length <= DEFAULT_BUFFER_SIZE) {
-            // Ghi file nhỏ một lần
             Files.write(Paths.get(filePath), data, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
         } else {
-            // Ghi file lớn theo chunks
             try (FileOutputStream fos = new FileOutputStream(filePath, true)) {
                 int offset = 0;
                 while (offset < data.length) {
@@ -123,12 +117,11 @@ public class FileUtils {
     // Phương thức mã hóa file lớn theo stream
     public static void encryptFile(String inputFile, String outputFile, Cipher cipher, boolean isChaCha20Poly1305,
             Consumer<Double> progressCallback, String mode) throws IOException {
-        byte[] iv = cipher.getIV(); // Lấy IV thực tế từ Cipher (nếu có)
+        byte[] iv = cipher.getIV();
 
         try (FileInputStream fis = new FileInputStream(inputFile);
                 FileOutputStream fos = new FileOutputStream(outputFile)) {
 
-            // Chỉ ghi IV nếu mode là CBC hoặc các mode cần IV
             if (iv != null && mode != null && mode.equalsIgnoreCase("CBC")) {
                 fos.write(iv);
             }
@@ -193,13 +186,6 @@ public class FileUtils {
         decryptFile(inputFile, outputFile, cipher, isChaCha20Poly1305, progressCallback, null);
     }
 
-    // Phương thức cập nhật tiến trình
-    private static void updateProgress(long current, long total) {
-        double progress = (double) current / total * 100;
-        // TODO: Implement progress callback
-        // System.out.printf("Progress: %.2f%%\n", progress);
-    }
-
     // Đọc toàn bộ file nhỏ
     public static byte[] readAllBytes(String filePath) throws IOException {
         return Files.readAllBytes(Paths.get(filePath));
@@ -210,7 +196,7 @@ public class FileUtils {
         Files.write(Paths.get(filePath), data, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
     }
 
-    // Keep the old methods for backward compatibility
+    // Các phương thức mã hóa/giải mã file cũ
     public static void encryptFile(String inputFile, String outputFile, Cipher cipher, boolean isChaCha20Poly1305)
             throws IOException {
         encryptFile(inputFile, outputFile, cipher, isChaCha20Poly1305, null);
