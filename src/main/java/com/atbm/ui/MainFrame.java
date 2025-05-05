@@ -5,6 +5,7 @@ import com.atbm.ui.panels.TextEncryptionPanel;
 import com.atbm.ui.panels.FileEncryptionPanel;
 import com.atbm.ui.panels.KeyListPanel;
 import com.atbm.ui.panels.HashPanel;
+import com.atbm.ui.panels.HomePanel;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import java.security.Security;
 
@@ -30,10 +31,10 @@ public class MainFrame extends JFrame {
     private static final String HASH_PANEL = "Hash";
 
     public MainFrame() {
-        // Apply default styles
+        // Aplly style
         StyleConstants.applyDefaultStyles();
 
-        setTitle("Phần mềm mã hoá/giải mã file");
+        setTitle("Phần mềm mã hoá/giải mã dữ liệu - LangNguyen");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(1200, 800); // Increased window size
         setLocationRelativeTo(null);
@@ -49,7 +50,7 @@ public class MainFrame extends JFrame {
         // Tạo panel nội dung chính (Right Panel) sử dụng CardLayout
         cardLayout = new CardLayout();
         mainContentPanel = new JPanel(cardLayout);
-        mainContentPanel.add(new JPanel(), HOME_PANEL);
+        mainContentPanel.add(new HomePanel(), HOME_PANEL);
 
         // Tạo và thiết lập KeyGenPanel
         KeyGenPanel keyGenPanel = new KeyGenPanel();
